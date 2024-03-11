@@ -8,6 +8,7 @@ import (
 	"market_place/repository"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -60,7 +61,7 @@ func ParseContext(f func(*fiber.Ctx) (int, string, interface{}, error)) func(*fi
 		c.Set("Content-Type", "application/json")
 
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
 			errBody := Response(message, nil)
 			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
 			return c.Status(code).Send(errBody)
