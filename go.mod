@@ -3,6 +3,7 @@ module market_place
 go 1.22.1
 
 require (
+	github.com/aws/aws-sdk-go v1.50.35
 	github.com/gofiber/fiber/v2 v2.52.2
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.5.1
@@ -13,6 +14,7 @@ require (
 require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/google/uuid v1.5.0 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/klauspost/compress v1.17.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
