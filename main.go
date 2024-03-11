@@ -50,7 +50,11 @@ func route() *fiber.App {
 		})
 	})
 	**/
-	app.Post("/v1/user/register", ParseContext(context.CTL.USER.Register))
+	user := app.Group("/v1/user")
+	{
+		user.Post("/register", ParseContext(context.CTL.USER.Register))
+		user.Post("/login", ParseContext(context.CTL.USER.Login))
+	}
 
 	return app
 }

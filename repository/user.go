@@ -31,3 +31,29 @@ func (c *User) Create(input collections.InputUserRegister) (interface{}, error) 
 
 	return result, nil
 }
+
+func (c *User) GetByID(id string) (collections.User, error) {
+
+	user := collections.User{}
+
+	sql := `SELECT id, name, username, password FROM users WHERE id = $1 and deleted_at is null;`
+	err := c.db.QueryRow(sql, id).Scan(&user.ID, &user.Name, &user.Username, &user.Password)
+	if err != nil {
+		return user, fmt.Errorf("get by id : %w", err)
+	}
+
+	return user, nil
+}
+
+func (c *User) GetByUsername(username string) (collections.User, error) {
+
+	user := collections.User{}
+
+	sql := `SELECT id, name, username, password FROM users WHERE UPPER(username) = UPPER($1) and deleted_at is null;`
+	err := c.db.QueryRow(sql, username).Scan(&user.ID, &user.Name, &user.Username, &user.Password)
+	if err != nil {
+		return user, fmt.Errorf("get by username : %w", err)
+	}
+
+	return user, nil
+}
