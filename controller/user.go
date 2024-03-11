@@ -29,10 +29,15 @@ func (c User) Register(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	raw := ctx.Request().Body()
 
-	input := collections.UserRegister{}
+	input := collections.InputUserRegister{}
 	err := json.Unmarshal([]byte(raw), &input)
 	if err != nil {
 		return http.StatusBadRequest, "unmarshal input", nil, err
+	}
+
+	err = library.Validate(input)
+	if err != nil {
+		return http.StatusBadRequest, err.Error(), nil, err
 	}
 
 	// set validation here
