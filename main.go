@@ -49,7 +49,7 @@ func route() *fiber.App {
 		})
 	})
 	**/
-	app.Get("/v1/user/register", ParseContext(context.CTL.USER.Register))
+	app.Post("/v1/user/register", ParseContext(context.CTL.USER.Register))
 
 	return app
 }

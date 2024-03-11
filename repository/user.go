@@ -22,8 +22,8 @@ func (c *User) Register(name, username, password string) (int, string, interface
 		`INSERT INTO 
 			users (name, username, password, created_at, updated_at) 
 		VALUES 
-			(?, ?, ?, current_timestamp, current_timestamp) ; `
-	_, err := c.db.Query(sql, name, username, password)
+			($1, $2, $3, current_timestamp, current_timestamp);`
+	_, err := c.db.Exec(sql, name, username, password)
 
 	if err != nil {
 		return http.StatusInternalServerError, "failed register", nil, fmt.Errorf("insert : %w", err)
