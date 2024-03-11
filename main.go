@@ -69,7 +69,7 @@ func ParseContext(f func(*fiber.Ctx) (int, string, interface{}, error)) func(*fi
 
 		successBody := Response(message, resp)
 		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
-		return c.Send(Response(message, resp))
+		return c.Status(code).Send(successBody)
 	}
 }
 

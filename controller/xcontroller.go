@@ -3,6 +3,8 @@ package controller
 import (
 	"market_place/library"
 	"market_place/repository"
+
+	"github.com/google/uuid"
 )
 
 type Controller struct {
@@ -13,4 +15,8 @@ func NewController(repo repository.Repository, jwt library.JWT, bcryptSalt int) 
 	return Controller{
 		USER: NewUserController(repo.USER, jwt, bcryptSalt),
 	}
+}
+
+func generateUUID() string {
+	return uuid.NewString()
 }

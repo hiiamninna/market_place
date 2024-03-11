@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"net/http"
+	"market_place/collections"
 )
 
 type User struct {
@@ -16,18 +16,18 @@ func NewUserRepository(db *sql.DB) User {
 	}
 }
 
-func (c *User) Register(name, username, password string) (int, string, interface{}, error) {
+func (c *User) Create(input collections.InputUserRegister) (interface{}, error) {
 
 	sql :=
 		`INSERT INTO 
-			users (name, username, password, created_at, updated_at) 
+			users (id, name, username, password, created_at, updated_at) 
 		VALUES 
-			($1, $2, $3, current_timestamp, current_timestamp);`
-	_, err := c.db.Exec(sql, name, username, password)
+			($1, $2, $3, $4, current_timestamp, current_timestamp);`
+	result, err := c.db.Exec(sql, input.ID, input.Name, input.Username, input.Password)
 
 	if err != nil {
-		return http.StatusInternalServerError, "failed register", nil, fmt.Errorf("insert : %w", err)
+		return nil, fmt.Errorf("insert : %w", err)
 	}
 
-	return http.StatusOK, "success register", nil, nil
+	return result, nil
 }
