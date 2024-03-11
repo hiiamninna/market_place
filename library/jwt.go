@@ -38,15 +38,15 @@ func (c JWT) CreateToken(id string, name string) (string, error) {
 		},
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodRS256, claims).SignedString([]byte(c.SecretKey))
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(c.SecretKey))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("new with claims : %w", err)
 	}
 
 	return token, nil
 }
 
-func (c JWT) Authentication(secretKey string) fiber.Handler {
+func (c JWT) Authentication() fiber.Handler {
 	return func(context *fiber.Ctx) error {
 		errHandle := func(err error, message string) error {
 			fmt.Println(err.Error())
@@ -66,10 +66,10 @@ func (c JWT) Authentication(secretKey string) fiber.Handler {
 		}
 
 		token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, errors.New("unexpected signing method")
+			if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return method, errors.New("unexpected signing method")
 			}
-			return []byte(secretKey), nil
+			return []byte("unexpected signing method"), nil
 		})
 
 		if err != nil {

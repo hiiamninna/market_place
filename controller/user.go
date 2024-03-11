@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"market_place/collections"
 	"market_place/library"
 	"market_place/repository"
@@ -35,18 +36,35 @@ func (c User) Register(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
+	// set validation here
 	err = library.Validate(input)
 	if err != nil {
 		return http.StatusBadRequest, err.Error(), nil, err
 	}
 
-	// set validation here
 	generated, err := bcrypt.GenerateFromPassword([]byte(input.Password), c.bcryptSalt)
 	if err != nil {
 		return http.StatusInternalServerError, "failed generate", nil, err
 	}
 
-	code, message, resp, err := c.repo.Register(input.Name, input.Username, string(generated))
+	input.Password = string(generated)
+	input.ID = generateUUID()
 
-	return code, message, resp, err
+	_, err = c.repo.Create(input)
+	if err != nil {
+		return http.StatusInternalServerError, "User registered failed", nil, err
+	}
+
+	token, err := c.jwt.CreateToken(input.ID, input.Name)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	resp := collections.UserRegister{
+		Name:        input.Name,
+		Username:    input.Username,
+		AccessToken: token,
+	}
+
+	return http.StatusCreated, "User registered successfully", resp, err
 }
