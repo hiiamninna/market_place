@@ -18,12 +18,12 @@ func NewUserRepository(db *sql.DB) User {
 
 func (c *User) Register(name, username, password string) (int, string, interface{}, error) {
 
-	sql := fmt.Sprintf(
+	sql :=
 		`INSERT INTO 
 			users (name, username, password, created_at, updated_at) 
 		VALUES 
-			('%s', '%s', '%s', current_timestamp, current_timestamp) ; `, name, username, password)
-	_, err := c.db.Query(sql)
+			(?, ?, ?, current_timestamp, current_timestamp) ; `
+	_, err := c.db.Query(sql, name, username, password)
 
 	if err != nil {
 		return http.StatusInternalServerError, "failed register", nil, fmt.Errorf("insert : %w", err)
