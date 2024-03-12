@@ -12,3 +12,14 @@ type User struct {
 	Username string
 	Password string
 }
+
+type Product struct {
+	ID             string
+	Name           string
+	Price          int
+	ImageUrl       string
+	Stock          int
+	Condition      string
+	Tags           []string
+	IsPurchaseable bool
+}
