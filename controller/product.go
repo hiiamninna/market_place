@@ -100,3 +100,27 @@ func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	return http.StatusOK, "succes", result, err
 }
+
+func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
+
+	raw := ctx.Request().Body()
+
+	input := collections.ProductStockInput{}
+	err := json.Unmarshal([]byte(raw), &input)
+	if err != nil {
+		return http.StatusBadRequest, "unmarshal input", nil, err
+	}
+
+	input.ID = ctx.Params("id")
+	_, err = c.repo.GetByID(input.ID)
+	if err != nil {
+		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
+	}
+
+	err = c.repo.UpdateStock(input.ID, input.Stock)
+	if err != nil {
+		return http.StatusInternalServerError, "product update stock failed", nil, err
+	}
+
+	return http.StatusOK, "product stock update successfully", nil, err
+}

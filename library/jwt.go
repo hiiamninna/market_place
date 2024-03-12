@@ -46,6 +46,7 @@ func (c JWT) CreateToken(id string, name string) (string, error) {
 	return token, nil
 }
 
+// TODO : 401 vs 403
 func (c JWT) Authentication() fiber.Handler {
 	return func(context *fiber.Ctx) error {
 		errHandle := func(err error, message string) error {
@@ -65,6 +66,7 @@ func (c JWT) Authentication() fiber.Handler {
 			authToken = arrayToken[1]
 		}
 
+		// TODO : after this http status code is 403/forbidden
 		token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
 			if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return method, errors.New("unexpected signing method")

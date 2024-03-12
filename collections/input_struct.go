@@ -22,3 +22,8 @@ type ProductInput struct {
 	Tags           []string `json:"tags"`
 	IsPurchaseable bool     `json:"isPurchaseable"`
 }
+
+type ProductStockInput struct {
+	ID    string
+	Stock int `json:"stock"`
+}
