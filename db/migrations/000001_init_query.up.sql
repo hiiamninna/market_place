@@ -23,4 +23,7 @@ CREATE TABLE IF NOT EXISTS products (
     deleted_at TIMESTAMP
 );
 
+-- NOTES
+-- ADD owner of the products
+
 COMMIT;

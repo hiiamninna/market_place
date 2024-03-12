@@ -91,3 +91,14 @@ func (c *Product) List() ([]collections.Product, error) {
 
 	return products, nil
 }
+
+func (c *Product) UpdateStock(id string, stock int) error {
+
+	sql := `UPDATE products SET stock = $1 WHERE id = $2;`
+	_, err := c.db.Exec(sql, stock, id)
+	if err != nil {
+		return fmt.Errorf("update stock : %w", err)
+	}
+
+	return nil
+}

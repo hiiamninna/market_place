@@ -65,6 +65,10 @@ func route() *fiber.App {
 		product.Get("", ParseContext(context.CTL.PRODUCT.List))
 		product.Get("/:id", ParseContext(context.CTL.PRODUCT.Get))
 	}
+	productStock := app.Group("/v1/product")
+	{
+		productStock.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
+	}
 
 	return app
 }
