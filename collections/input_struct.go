@@ -11,3 +11,14 @@ type UserLoginInput struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
+
+type ProductInput struct {
+	ID             string
+	Name           string   `json:"name"`
+	Price          int      `json:"price"`
+	ImageUrl       string   `json:"imageUrl"`
+	Stock          int      `json:"stock"`
+	Condition      string   `json:"condition"`
+	Tags           []string `json:"tags"`
+	IsPurchaseable bool     `json:"isPurchaseable"`
+}

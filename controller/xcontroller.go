@@ -8,12 +8,14 @@ import (
 )
 
 type Controller struct {
-	USER User
+	USER    User
+	PRODUCT Product
 }
 
 func NewController(repo repository.Repository, jwt library.JWT, bcryptSalt int) Controller {
 	return Controller{
-		USER: NewUserController(repo.USER, jwt, bcryptSalt),
+		USER:    NewUserController(repo.USER, jwt, bcryptSalt),
+		PRODUCT: NewProductController(repo.PRODUCT),
 	}
 }
 
