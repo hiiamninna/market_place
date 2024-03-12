@@ -44,7 +44,7 @@ func route() *fiber.App {
 			"message": "running an api at port 8000",
 		})
 	})
-	app.Get("/test", jwt.Authentication(config.JWTSecret), func(c *fiber.Ctx) error {
+	app.Get("/test", context.JWT.Authentication(), func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
 			"message": "you are authorized",
 		})
@@ -59,6 +59,11 @@ func route() *fiber.App {
 	product := app.Group("/v1/product")
 	{
 		product.Post("", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Create))
+		product.Patch("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Update))
+		product.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Delete))
+
+		product.Get("", ParseContext(context.CTL.PRODUCT.List))
+		product.Get("/:id", ParseContext(context.CTL.PRODUCT.Get))
 	}
 
 	return app
