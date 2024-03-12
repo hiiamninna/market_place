@@ -56,6 +56,11 @@ func route() *fiber.App {
 		user.Post("/login", ParseContext(context.CTL.USER.Login))
 	}
 
+	product := app.Group("/v1/product")
+	{
+		product.Post("", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Create))
+	}
+
 	return app
 }
 
@@ -98,6 +103,7 @@ func Response(message string, data interface{}) []byte {
 type Context struct {
 	CFG library.Config
 	CTL controller.Controller
+	JWT library.JWT
 	S3  library.S3
 }
 
@@ -123,6 +129,7 @@ func NewContext() (Context, error) {
 
 	return Context{
 		CFG: config,
+		JWT: jwt,
 		CTL: ctl,
 		S3:  library.S3{},
 	}, nil

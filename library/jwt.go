@@ -69,7 +69,7 @@ func (c JWT) Authentication() fiber.Handler {
 			if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return method, errors.New("unexpected signing method")
 			}
-			return []byte("unexpected signing method"), nil
+			return []byte(c.SecretKey), nil
 		})
 
 		if err != nil {
