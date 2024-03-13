@@ -14,6 +14,7 @@ type UserLoginInput struct {
 
 type ProductInput struct {
 	ID             string
+	UserID         int
 	Name           string   `json:"name"`
 	Price          int      `json:"price"`
 	ImageUrl       string   `json:"imageUrl"`
