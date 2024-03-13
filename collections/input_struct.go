@@ -31,6 +31,7 @@ type ProductStockInput struct {
 
 type BankAccountInput struct {
 	ID                string
+	UserID            string
 	BankName          string `json:"bankName"`
 	BankAccountName   string `json:"bankAccountName"`
 	BankAccountNumber string `json:"bankAccountNumber"`

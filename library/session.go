@@ -1,6 +1,7 @@
 package library
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -47,6 +48,15 @@ func GetAllSession(context *fiber.Ctx) (map[string]interface{}, error) {
 	}
 
 	return sessionsMap, nil
+}
+
+func GetUserID(context *fiber.Ctx) (string, error) {
+	maps, err := GetAllSession(context)
+	if err != nil {
+		return "", fmt.Errorf("get all session : %w", err)
+	}
+	userID := maps[`user_id`].(string)
+	return userID, nil
 }
 
 func DeleteSession(context *fiber.Ctx) (string, error) {

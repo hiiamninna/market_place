@@ -7,21 +7,21 @@ type UserRegisterAndLogin struct {
 }
 
 type User struct {
-	ID       string
-	Name     string
-	Username string
-	Password string
+	ID       string `json:"userId"`
+	Name     string `json:"name"`
+	Username string `json:"username"`
+	Password string `json:"accessToken"`
 }
 
 type Product struct {
 	ID             string
-	Name           string
-	Price          int
-	ImageUrl       string
-	Stock          int
-	Condition      string
-	Tags           []string
-	IsPurchaseable bool
+	Name           string   `json:"name"`
+	Price          int      `json:"price"`
+	ImageUrl       string   `json:"imageUrl"`
+	Stock          int      `json:"stock"`
+	Condition      string   `json:"condition"`
+	Tags           []string `json:"tags"`
+	IsPurchaseable bool     `json:"isPurchaseable"`
 }
 
 type FileUpload struct {
