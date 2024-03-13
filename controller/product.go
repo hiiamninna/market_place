@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"market_place/collections"
+	"market_place/library"
 	"market_place/repository"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -30,9 +32,14 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
-	input.ID = generateUUID()
+	maps, err := library.GetAllSession(ctx)
+	if err != nil {
+		return http.StatusBadRequest, "failed get session", nil, err
+	}
 
-	_, err = c.repo.Create(input)
+	input.UserID, _ = strconv.Atoi(maps[`user_id`].(string))
+
+	err = c.repo.Create(input)
 	if err != nil {
 		return http.StatusInternalServerError, "product added failed", nil, err
 	}
@@ -56,7 +63,7 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 	input.ID = id
 
-	_, err = c.repo.Update(input)
+	err = c.repo.Update(input)
 	if err != nil {
 		return http.StatusInternalServerError, "product updated failed", nil, err
 	}

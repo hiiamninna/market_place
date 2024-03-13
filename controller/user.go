@@ -8,6 +8,7 @@ import (
 	"market_place/library"
 	"market_place/repository"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"
@@ -54,14 +55,13 @@ func (c User) Register(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 
 	input.Password = string(generated)
-	input.ID = generateUUID()
 
-	token, err := c.jwt.CreateToken(input.ID, input.Name)
+	id, err := c.repo.Create(input)
 	if err != nil {
 		return http.StatusInternalServerError, "User registered failed", nil, err
 	}
 
-	_, err = c.repo.Create(input)
+	token, err := c.jwt.CreateToken(strconv.Itoa(id), input.Name)
 	if err != nil {
 		return http.StatusInternalServerError, "User registered failed", nil, err
 	}

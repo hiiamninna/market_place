@@ -67,7 +67,8 @@ func (c JWT) Authentication() fiber.Handler {
 		}
 
 		// TODO : after this http status code is 403/forbidden
-		token, err := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
+		claims := &customClaims{}
+		token, err := jwt.ParseWithClaims(authToken, claims, func(token *jwt.Token) (interface{}, error) {
 			if method, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return method, errors.New("unexpected signing method")
 			}
@@ -81,6 +82,8 @@ func (c JWT) Authentication() fiber.Handler {
 		if !token.Valid {
 			return errHandle(errors.New("invalid token"), "invalid token")
 		}
+
+		SetSession(context, claims.ID)
 
 		return context.Next()
 	}

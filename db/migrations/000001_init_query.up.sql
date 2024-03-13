@@ -1,7 +1,7 @@
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS users (
-    id VARCHAR(128) PRIMARY KEY NOT NULL,
+    id SERIAL PRIMARY KEY NOT NULL,
     name VARCHAR(255) NOT NULL,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS products (
-    id VARCHAR(128) PRIMARY KEY NOT NULL,
+    id SERIAL PRIMARY KEY NOT NULL,
+    user_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
     price INT,
     image_url VARCHAR(255) NOT NULL,
@@ -23,7 +24,15 @@ CREATE TABLE IF NOT EXISTS products (
     deleted_at TIMESTAMP
 );
 
--- NOTES
--- ADD owner of the products
+CREATE TABLE IF NOT EXISTS bank_accounts (
+    id SERIAL PRIMARY KEY NOT NULL,
+    user_id INT NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    account_name VARCHAR(255) NOT NULL,
+    account_number VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP
+);
 
 COMMIT;

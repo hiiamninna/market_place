@@ -16,27 +16,34 @@ func NewUserRepository(db *sql.DB) User {
 	}
 }
 
-func (c *User) Create(input collections.InputUserRegister) (interface{}, error) {
+func (c *User) Create(input collections.InputUserRegister) (int, error) {
 
+	var id int
 	sql :=
 		`INSERT INTO 
-			users (id, name, username, password, created_at, updated_at) 
+			users (name, username, password, created_at, updated_at) 
 		VALUES 
-			($1, $2, $3, $4, current_timestamp, current_timestamp);`
-	result, err := c.db.Exec(sql, input.ID, input.Name, input.Username, input.Password)
+			($1, $2, $3, current_timestamp, current_timestamp)
+		RETURNING id;`
+	rows, err := c.db.Query(sql, input.Name, input.Username, input.Password)
+
+	for rows.Next() {
+		rows.Scan(&id)
+	}
+	defer rows.Close()
 
 	if err != nil {
-		return nil, fmt.Errorf("insert : %w", err)
+		return id, fmt.Errorf("insert : %w", err)
 	}
 
-	return result, nil
+	return id, nil
 }
 
-func (c *User) GetByID(id string) (collections.User, error) {
+func (c *User) GetByID(id int) (collections.User, error) {
 
 	user := collections.User{}
 
-	sql := `SELECT id, name, username, password FROM users WHERE id = $1 and deleted_at is null;`
+	sql := `SELECT TEXT(id), name, username, password FROM users WHERE id = $1 and deleted_at is null;`
 	err := c.db.QueryRow(sql, id).Scan(&user.ID, &user.Name, &user.Username, &user.Password)
 	if err != nil {
 		return user, fmt.Errorf("get by id : %w", err)
@@ -49,7 +56,7 @@ func (c *User) GetByUsername(username string) (collections.User, error) {
 
 	user := collections.User{}
 
-	sql := `SELECT id, name, username, password FROM users WHERE UPPER(username) = UPPER($1) and deleted_at is null;`
+	sql := `SELECT TEXT(id), name, username, password FROM users WHERE UPPER(username) = UPPER($1) and deleted_at is null;`
 	err := c.db.QueryRow(sql, username).Scan(&user.ID, &user.Name, &user.Username, &user.Password)
 	if err != nil {
 		return user, fmt.Errorf("get by username : %w", err)

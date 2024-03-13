@@ -16,33 +16,33 @@ func NewProductRepository(db *sql.DB) Product {
 	}
 }
 
-func (c *Product) Create(input collections.ProductInput) (interface{}, error) {
+func (c *Product) Create(input collections.ProductInput) error {
 
 	sql :=
 		`INSERT INTO 
-			products (id, name, price, image_url, stock, condition, is_purchaseable, created_at, updated_at) 
+			products (name, price, image_url, stock, condition, is_purchaseable, user_id, created_at, updated_at) 
 		VALUES 
 			($1, $2, $3, $4, $5, $6, $7, current_timestamp, current_timestamp);`
-	result, err := c.db.Exec(sql, input.ID, input.Name, input.Price, input.ImageUrl, input.Stock, input.Condition, input.IsPurchaseable)
+	_, err := c.db.Exec(sql, input.Name, input.Price, input.ImageUrl, input.Stock, input.Condition, input.IsPurchaseable, input.UserID)
 
 	if err != nil {
-		return nil, fmt.Errorf("insert : %w", err)
+		return fmt.Errorf("insert : %w", err)
 	}
 
-	return result, nil
+	return nil
 }
 
-func (c *Product) Update(input collections.ProductInput) (interface{}, error) {
+func (c *Product) Update(input collections.ProductInput) error {
 	sql :=
 		`UPDATE products 
 		SET name = $1, price = $2, condition = $3, is_purchaseable = $4, updated_at = current_timestamp
 		WHERE id = $5 AND deleted_at is null;`
-	result, err := c.db.Exec(sql, input.Name, input.Price, input.Condition, input.IsPurchaseable, input.ID)
+	_, err := c.db.Exec(sql, input.Name, input.Price, input.Condition, input.IsPurchaseable, input.ID)
 	if err != nil {
-		return nil, fmt.Errorf("update : %w", err)
+		return fmt.Errorf("update : %w", err)
 	}
 
-	return result, nil
+	return nil
 }
 
 func (c *Product) Delete(id string) error {
