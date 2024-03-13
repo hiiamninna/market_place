@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"market_place/collections"
+
+	"github.com/lib/pq"
 )
 
 type Product struct {
@@ -20,10 +22,10 @@ func (c *Product) Create(input collections.ProductInput) error {
 
 	sql :=
 		`INSERT INTO 
-			products (name, price, image_url, stock, condition, is_purchaseable, user_id, created_at, updated_at) 
+			products (name, price, image_url, stock, condition, is_purchaseable, user_id, tags, created_at, updated_at) 
 		VALUES 
-			($1, $2, $3, $4, $5, $6, $7, current_timestamp, current_timestamp);`
-	_, err := c.db.Exec(sql, input.Name, input.Price, input.ImageUrl, input.Stock, input.Condition, input.IsPurchaseable, input.UserID)
+			($1, $2, $3, $4, $5, $6, $7, $8, current_timestamp, current_timestamp);`
+	_, err := c.db.Exec(sql, input.Name, input.Price, input.ImageUrl, input.Stock, input.Condition, input.IsPurchaseable, input.UserID, pq.Array(input.Tags))
 
 	if err != nil {
 		return fmt.Errorf("insert : %w", err)
@@ -35,9 +37,9 @@ func (c *Product) Create(input collections.ProductInput) error {
 func (c *Product) Update(input collections.ProductInput) error {
 	sql :=
 		`UPDATE products 
-		SET name = $1, price = $2, condition = $3, is_purchaseable = $4, updated_at = current_timestamp
-		WHERE id = $5 AND deleted_at is null;`
-	_, err := c.db.Exec(sql, input.Name, input.Price, input.Condition, input.IsPurchaseable, input.ID)
+		SET name = $1, price = $2, condition = $3, is_purchaseable = $4, tags = $5, updated_at = current_timestamp
+		WHERE id = $6 AND deleted_at is null;`
+	_, err := c.db.Exec(sql, input.Name, input.Price, input.Condition, input.IsPurchaseable, pq.Array(input.Tags), input.ID)
 	if err != nil {
 		return fmt.Errorf("update : %w", err)
 	}
@@ -53,6 +55,19 @@ func (c *Product) Delete(id string) error {
 	}
 
 	return nil
+}
+
+func (c *Product) GetOwnByID(id, userID string) (collections.Product, error) {
+
+	p := collections.Product{}
+
+	sql := `SELECT id, name, price, image_url, stock, condition, is_purchaseable FROM products WHERE id = $1 AND user_id = $2 AND deleted_at is null;`
+	err := c.db.QueryRow(sql, id, userID).Scan(&p.ID, &p.Name, &p.Price, &p.ImageUrl, &p.Stock, &p.Condition, &p.IsPurchaseable)
+	if err != nil {
+		return p, fmt.Errorf("get own by id : %w", err)
+	}
+
+	return p, nil
 }
 
 func (c *Product) GetByID(id string) (collections.Product, error) {
