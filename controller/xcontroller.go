@@ -8,16 +8,18 @@ import (
 )
 
 type Controller struct {
-	USER    User
-	PRODUCT Product
-	IMAGE   Image
+	USER         User
+	PRODUCT      Product
+	IMAGE        Image
+	BANK_ACCOUNT BankAccount
 }
 
 func NewController(repo repository.Repository, jwt library.JWT, bcryptSalt int, s3 library.S3) Controller {
 	return Controller{
-		USER:    NewUserController(repo.USER, jwt, bcryptSalt),
-		PRODUCT: NewProductController(repo.PRODUCT),
-		IMAGE:   NewImageController(s3),
+		USER:         NewUserController(repo.USER, jwt, bcryptSalt),
+		PRODUCT:      NewProductController(repo.PRODUCT),
+		IMAGE:        NewImageController(s3),
+		BANK_ACCOUNT: NewBankAccountRepository(repo.BANK_ACCOUNT),
 	}
 }
 

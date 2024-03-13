@@ -27,3 +27,10 @@ type Product struct {
 type FileUpload struct {
 	ImageUrl string `json:"imageUrl"`
 }
+
+type BankAccount struct {
+	ID                string `json:"bankAccountId"`
+	BankName          string `json:"bankName"`
+	BankAccountName   string `json:"bankAccountName"`
+	BankAccountNumber string `json:"bankAccountNumber"`
+}
