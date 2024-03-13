@@ -23,3 +23,7 @@ type Product struct {
 	Tags           []string
 	IsPurchaseable bool
 }
+
+type FileUpload struct {
+	ImageUrl string `json:"imageUrl"`
+}

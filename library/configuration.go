@@ -13,7 +13,7 @@ type Config struct {
 	JWTSecret      string
 	BcryptSalt     int
 	DB             Database
-	S3             S3
+	S3Config       S3Config
 }
 
 // Setting up the environment to be used
@@ -35,10 +35,10 @@ func NewConfiguration() (Config, error) {
 			Username: EnvString("DB_USERNAME"),
 			Password: EnvString("DB_PASSWORD"),
 		},
-		S3: S3{
-			ID:        EnvString("S3_ID"),
-			SecretKey: EnvString("S3_SECRET_KEY"),
-			BaseUrl:   EnvString("S3_BASE_URL"),
+		S3Config: S3Config{
+			ID:         EnvString("S3_ID"),
+			SecretKey:  EnvString("S3_SECRET_KEY"),
+			BucketName: EnvString("S3_BUCKET_NAME"),
 		},
 	}
 

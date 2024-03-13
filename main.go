@@ -70,6 +70,8 @@ func route() *fiber.App {
 		productStock.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
 	}
 
+	app.Post("/v1/image", context.JWT.Authentication(), ParseContext(context.CTL.IMAGE.ImageUpload))
+
 	return app
 }
 
@@ -132,14 +134,19 @@ func NewContext() (Context, error) {
 		fmt.Println("new db : %w", err)
 	}
 
+	s3, err := library.NewS3(config.S3Config)
+	if err != nil {
+		fmt.Println("new s3 : %w", err)
+	}
+
 	// set up repo and controller
 	repo := repository.NewRepository(db)
-	ctl := controller.NewController(repo, jwt, config.BcryptSalt)
+	ctl := controller.NewController(repo, jwt, config.BcryptSalt, s3)
 
 	return Context{
 		CFG: config,
 		JWT: jwt,
 		CTL: ctl,
-		S3:  library.S3{},
+		S3:  s3,
 	}, nil
 }
