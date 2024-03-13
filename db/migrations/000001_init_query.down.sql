@@ -1,9 +1,6 @@
-BEGIN;
+-- DROP TABLE
+-- DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS products;
+-- DROP TABLE IF EXISTS bank_accounts;
 
-DROP TABLE IF EXISTS users;
-
-DROP TABLE IF EXISTS products;
-
-DROP TABLE IF EXISTS bank_accounts;
-
-COMMIT;
+ALTER TABLE bank_accounts DROP user_id;

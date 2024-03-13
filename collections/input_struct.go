@@ -28,3 +28,10 @@ type ProductStockInput struct {
 	ID    string
 	Stock int `json:"stock"`
 }
+
+type BankAccountInput struct {
+	ID                string
+	BankName          string `json:"bankName"`
+	BankAccountName   string `json:"bankAccountName"`
+	BankAccountNumber string `json:"bankAccountNumber"`
+}

@@ -1,0 +1,88 @@
+package controller
+
+import (
+	"encoding/json"
+	"errors"
+	"market_place/collections"
+	"market_place/repository"
+	"net/http"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+type BankAccount struct {
+	repo repository.BankAccount
+}
+
+func NewBankAccountRepository(backAccount repository.BankAccount) BankAccount {
+	return BankAccount{
+		repo: backAccount,
+	}
+}
+
+func (c BankAccount) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
+
+	raw := ctx.Request().Body()
+
+	input := collections.BankAccountInput{}
+	err := json.Unmarshal([]byte(raw), &input)
+	if err != nil {
+		return http.StatusBadRequest, "unmarshal input", nil, err
+	}
+
+	err = c.repo.Create(input)
+	if err != nil {
+		return http.StatusInternalServerError, "bank account added failed", nil, err
+	}
+
+	return http.StatusOK, "bank account added successfully", nil, err
+}
+
+func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
+	id := ctx.Params("id")
+	_, err := c.repo.GetByID(id)
+	if err != nil {
+		return http.StatusNotFound, "bank account not found", nil, errors.New("bank account not found")
+	}
+
+	raw := ctx.Request().Body()
+	input := collections.BankAccountInput{}
+	err = json.Unmarshal([]byte(raw), &input)
+	if err != nil {
+		return http.StatusBadRequest, "unmarshal input", nil, err
+	}
+	input.ID = id
+
+	err = c.repo.Update(input)
+	if err != nil {
+		return http.StatusInternalServerError, "bank account updated failed", nil, err
+	}
+
+	return http.StatusOK, "bank account updated successfully", nil, err
+}
+
+func (c BankAccount) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
+
+	id := ctx.Params("id")
+	_, err := c.repo.GetByID(id)
+	if err != nil {
+		return http.StatusNotFound, "bank account not found", nil, errors.New("bank account not found")
+	}
+
+	err = c.repo.Delete(id)
+	if err != nil {
+		return http.StatusInternalServerError, "bank account delete failed", nil, err
+	}
+
+	return http.StatusOK, "bank account deleted successfully", nil, err
+}
+
+func (c BankAccount) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
+
+	result, err := c.repo.List()
+	if err != nil {
+		return http.StatusInternalServerError, "list bank account error", nil, err
+	}
+
+	return http.StatusOK, "success", result, err
+}

@@ -70,7 +70,18 @@ func route() *fiber.App {
 		productStock.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
 	}
 
-	app.Post("/v1/image", context.JWT.Authentication(), ParseContext(context.CTL.IMAGE.ImageUpload))
+	image := app.Group("/v1/image")
+	{
+		image.Post("", context.JWT.Authentication(), ParseContext(context.CTL.IMAGE.ImageUpload))
+	}
+
+	bankAccount := app.Group("/v1/bank/account")
+	{
+		bankAccount.Post("", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Create))
+		bankAccount.Patch("/:id", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Update))
+		bankAccount.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Delete))
+		bankAccount.Get("", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.List))
+	}
 
 	return app
 }
