@@ -7,7 +7,6 @@ import (
 	"market_place/library"
 	"market_place/repository"
 	"net/http"
-	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -32,12 +31,7 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
-	maps, err := library.GetAllSession(ctx)
-	if err != nil {
-		return http.StatusBadRequest, "failed get session", nil, err
-	}
-
-	input.UserID, _ = strconv.Atoi(maps[`user_id`].(string))
+	input.UserID, _ = library.GetUserID(ctx)
 
 	err = c.repo.Create(input)
 	if err != nil {
@@ -49,8 +43,10 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
+	userID, _ := library.GetUserID(ctx)
+
 	id := ctx.Params("id")
-	_, err := c.repo.GetByID(id)
+	_, err := c.repo.GetOwnByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
 	}
@@ -73,8 +69,10 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 func (c Product) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
+	userID, _ := library.GetUserID(ctx)
+
 	id := ctx.Params("id")
-	_, err := c.repo.GetByID(id)
+	_, err := c.repo.GetOwnByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
 	}
@@ -85,6 +83,32 @@ func (c Product) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 
 	return http.StatusOK, "product deleted successfully", nil, err
+}
+
+func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
+
+	raw := ctx.Request().Body()
+
+	input := collections.ProductStockInput{}
+	err := json.Unmarshal([]byte(raw), &input)
+	if err != nil {
+		return http.StatusBadRequest, "unmarshal input", nil, err
+	}
+
+	userID, _ := library.GetUserID(ctx)
+
+	input.ID = ctx.Params("id")
+	_, err = c.repo.GetOwnByID(input.ID, userID)
+	if err != nil {
+		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
+	}
+
+	err = c.repo.UpdateStock(input.ID, input.Stock)
+	if err != nil {
+		return http.StatusInternalServerError, "product update stock failed", nil, err
+	}
+
+	return http.StatusOK, "product stock update successfully", nil, err
 }
 
 func (c Product) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
@@ -106,28 +130,4 @@ func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 
 	return http.StatusOK, "succes", result, err
-}
-
-func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
-
-	raw := ctx.Request().Body()
-
-	input := collections.ProductStockInput{}
-	err := json.Unmarshal([]byte(raw), &input)
-	if err != nil {
-		return http.StatusBadRequest, "unmarshal input", nil, err
-	}
-
-	input.ID = ctx.Params("id")
-	_, err = c.repo.GetByID(input.ID)
-	if err != nil {
-		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
-	}
-
-	err = c.repo.UpdateStock(input.ID, input.Stock)
-	if err != nil {
-		return http.StatusInternalServerError, "product update stock failed", nil, err
-	}
-
-	return http.StatusOK, "product stock update successfully", nil, err
 }
