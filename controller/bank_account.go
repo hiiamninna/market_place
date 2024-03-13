@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"market_place/collections"
+	"market_place/library"
 	"market_place/repository"
 	"net/http"
 
@@ -30,6 +31,8 @@ func (c BankAccount) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
+	input.UserID, _ = library.GetUserID(ctx)
+
 	err = c.repo.Create(input)
 	if err != nil {
 		return http.StatusInternalServerError, "bank account added failed", nil, err
@@ -39,8 +42,11 @@ func (c BankAccount) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 }
 
 func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
+
+	userID, _ := library.GetUserID(ctx)
+
 	id := ctx.Params("id")
-	_, err := c.repo.GetByID(id)
+	_, err := c.repo.GetByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "bank account not found", nil, errors.New("bank account not found")
 	}
@@ -63,13 +69,15 @@ func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 func (c BankAccount) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
+	userID, _ := library.GetUserID(ctx)
+
 	id := ctx.Params("id")
-	_, err := c.repo.GetByID(id)
+	_, err := c.repo.GetByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "bank account not found", nil, errors.New("bank account not found")
 	}
 
-	err = c.repo.Delete(id)
+	err = c.repo.Delete(id, userID)
 	if err != nil {
 		return http.StatusInternalServerError, "bank account delete failed", nil, err
 	}
@@ -79,7 +87,9 @@ func (c BankAccount) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 func (c BankAccount) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
-	result, err := c.repo.List()
+	userID, _ := library.GetUserID(ctx)
+
+	result, err := c.repo.List(userID)
 	if err != nil {
 		return http.StatusInternalServerError, "list bank account error", nil, err
 	}
