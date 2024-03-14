@@ -70,8 +70,8 @@ func (c *Product) GetOwnByID(id, userID string) (collections.Product, error) {
 	return p, nil
 }
 
-func (c *Product) GetByID(id string) (collections.Product, error) {
 
+func (c *Product) GetByID(id string) (collections.Product, error) {
 	p := collections.Product{}
 
 	sql := `SELECT id, name, price, image_url, stock, condition, is_purchaseable FROM products WHERE id = $1 and deleted_at is null;`

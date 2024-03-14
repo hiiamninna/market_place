@@ -2,9 +2,15 @@ package library
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"strconv"
 	"strings"
+)
+
+const (
+	New    string = "new"
+	Second string = "second"
 )
 
 func Validate(item interface{}) error {
@@ -53,6 +59,12 @@ func validateString(rules []string, name string, v interface{}) error {
 		if err := strMaxLength(rule, name, value); err != nil {
 			return err
 		}
+		if err := strIsValidUrl(rule, name, value); err != nil {
+			return err
+		}
+		if err := strCheckEnum(rule, name, value); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -67,6 +79,50 @@ func strRequired(rule, name, value string) error {
 	}
 
 	return nil
+}
+
+func strIsValidUrl(rule, name, value string) error {
+	if !strings.Contains(rule, "url") {
+		return nil
+	}
+
+	_, err := url.Parse(value)
+	if err != nil {
+		return fmt.Errorf("fiels %s must be a valid url", name)
+	}
+
+	return nil
+}
+
+func strCheckEnum(rule, name, value string) error {
+	if !strings.Contains(rule, "enum") {
+		return nil
+	}
+
+	r := strings.Split(rule, ":")
+	if len(r) < 2 {
+		return fmt.Errorf("enum invalid rule definition, name : " + name)
+	}
+
+	enumType := strings.TrimSpace(r[1])
+
+	switch enumType {
+	case "condition":
+		checkEnumCondition(name, value)
+	default:
+		return fmt.Errorf("enum invalid rule definition, name : " + name)
+	}
+
+	return nil
+}
+
+func checkEnumCondition(name, value string) error {
+	switch value {
+	case New, Second:
+		return nil
+	default:
+		return fmt.Errorf("invalid value for field %s", name)
+	}
 }
 
 func strMinLength(rule, name, value string) error {

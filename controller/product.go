@@ -33,6 +33,11 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	input.UserID, _ = library.GetUserID(ctx)
 
+	err = library.Validate(input)
+	if err != nil {
+		return http.StatusBadRequest, err.Error(), nil, err
+	}
+
 	err = c.repo.PRODUCT.Create(input)
 	if err != nil {
 		return http.StatusInternalServerError, "product added failed", nil, err
@@ -58,6 +63,11 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 	input.ID = id
+
+	err = library.Validate(input)
+	if err != nil {
+		return http.StatusBadRequest, err.Error(), nil, err
+	}
 
 	err = c.repo.PRODUCT.Update(input)
 	if err != nil {
