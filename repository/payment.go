@@ -49,3 +49,28 @@ func (c Payment) Create(input collections.PaymentInput) error {
 
 	return nil
 }
+
+func (c Payment) GetPurchaseCountByProductID(productID string) (int, error) {
+
+	var counter int
+
+	sql := `SELECT SUM(quantity) FROM payments WHERE product_id = $1`
+	err := c.db.QueryRow(sql, productID).Scan(&counter)
+	if err != nil {
+		return counter, fmt.Errorf("sum quantity : %w", err)
+	}
+
+	return counter, nil
+}
+
+func (c Payment) GetProductSoldTotalByUser(userID string) (int, error) {
+	var counter int
+
+	sql := `SELECT SUM(quantity) FROM payments WHERE product_id in (SELECT id FROM products WHERE user_id = $1);`
+	err := c.db.QueryRow(sql, userID).Scan(&counter)
+	if err != nil {
+		return counter, fmt.Errorf("product sold total : %w", err)
+	}
+
+	return counter, nil
+}

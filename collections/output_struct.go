@@ -14,7 +14,8 @@ type User struct {
 }
 
 type Product struct {
-	ID             string
+	ID             string   `json:"productId"`
+	UserID         string   `json:"-"`
 	Name           string   `json:"name"`
 	Price          int      `json:"price"`
 	ImageUrl       string   `json:"imageUrl"`
@@ -22,6 +23,7 @@ type Product struct {
 	Condition      string   `json:"condition"`
 	Tags           []string `json:"tags"`
 	IsPurchaseable bool     `json:"isPurchaseable"`
+	PurchaseCount  int      `json:"purchaseCount"`
 }
 
 type FileUpload struct {
@@ -33,4 +35,15 @@ type BankAccount struct {
 	BankName          string `json:"bankName"`
 	BankAccountName   string `json:"bankAccountName"`
 	BankAccountNumber string `json:"bankAccountNumber"`
+}
+
+type Seller struct {
+	Name             string        `json:"name"`
+	ProductSoldTotal int           `json:"productSoldTotal"`
+	BankAccounts     []BankAccount `json:"bankAccounts"`
+}
+
+type ProductDetail struct {
+	Product Product `json:"product"`
+	Seller  Seller  `json:"seller"`
 }

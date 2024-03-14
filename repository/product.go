@@ -70,12 +70,12 @@ func (c *Product) GetOwnByID(id, userID string) (collections.Product, error) {
 	return p, nil
 }
 
-
 func (c *Product) GetByID(id string) (collections.Product, error) {
+
 	p := collections.Product{}
 
-	sql := `SELECT id, name, price, image_url, stock, condition, is_purchaseable FROM products WHERE id = $1 and deleted_at is null;`
-	err := c.db.QueryRow(sql, id).Scan(&p.ID, &p.Name, &p.Price, &p.ImageUrl, &p.Stock, &p.Condition, &p.IsPurchaseable)
+	sql := `SELECT TEXT(id), name, price, image_url, stock, condition, is_purchaseable, user_id, tags FROM products WHERE id = $1 and deleted_at is null;`
+	err := c.db.QueryRow(sql, id).Scan(&p.ID, &p.Name, &p.Price, &p.ImageUrl, &p.Stock, &p.Condition, &p.IsPurchaseable, &p.UserID, pq.Array(&p.Tags))
 	if err != nil {
 		return p, fmt.Errorf("get by id : %w", err)
 	}
@@ -86,7 +86,7 @@ func (c *Product) GetByID(id string) (collections.Product, error) {
 func (c *Product) List() ([]collections.Product, error) {
 	products := []collections.Product{}
 
-	sql := `SELECT id, name, price, image_url, stock, condition, is_purchaseable FROM products WHERE deleted_at is null;`
+	sql := `SELECT id, name, price, image_url, stock, condition, is_purchaseable, tags FROM products WHERE deleted_at is null;`
 	rows, err := c.db.Query(sql)
 	if err != nil {
 		return products, fmt.Errorf("select list : %w", err)
@@ -96,7 +96,7 @@ func (c *Product) List() ([]collections.Product, error) {
 	for rows.Next() {
 		p := collections.Product{}
 
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.ImageUrl, &p.Stock, &p.Condition, &p.IsPurchaseable)
+		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.ImageUrl, &p.Stock, &p.Condition, &p.IsPurchaseable, pq.Array(&p.Tags))
 		if err != nil {
 			return products, fmt.Errorf("rows scan : %w", err)
 		}

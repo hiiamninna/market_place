@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"market_place/collections"
 	"market_place/library"
 	"market_place/repository"
@@ -128,16 +129,40 @@ func (c Product) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusInternalServerError, "list product error", nil, err
 	}
 
-	return http.StatusOK, "succes", result, err
+	return http.StatusOK, "ok", result, err
 }
 
 func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
+	var err error
+	productDetail := collections.ProductDetail{}
+
 	id := ctx.Params("id")
-	result, err := c.repo.PRODUCT.GetByID(id)
+	productDetail.Product, err = c.repo.PRODUCT.GetByID(id)
 	if err != nil {
-		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
+		return http.StatusNotFound, "product not found", nil, fmt.Errorf("get by id : %w", err)
 	}
 
-	return http.StatusOK, "succes", result, err
+	productDetail.Product.PurchaseCount, err = c.repo.PAYMENT.GetPurchaseCountByProductID(id)
+	if err != nil {
+		fmt.Errorf("get purchase count : %w", err)
+	}
+
+	seller, err := c.repo.USER.GetByID(productDetail.Product.UserID)
+	if err != nil {
+		fmt.Errorf("get seller : %w", err)
+	}
+
+	productDetail.Seller.Name = seller.Name
+	productDetail.Seller.ProductSoldTotal, err = c.repo.PAYMENT.GetProductSoldTotalByUser(seller.ID)
+	if err != nil {
+		fmt.Errorf("get product sold total : %w", err)
+	}
+
+	productDetail.Seller.BankAccounts, err = c.repo.BANK_ACCOUNT.List(seller.ID)
+	if err != nil {
+		fmt.Errorf("get bank accounts : %w", err)
+	}
+
+	return http.StatusOK, "ok", productDetail, err
 }
