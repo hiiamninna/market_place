@@ -12,12 +12,12 @@ import (
 )
 
 type BankAccount struct {
-	repo repository.BankAccount
+	repo repository.Repository
 }
 
-func NewBankAccountRepository(backAccount repository.BankAccount) BankAccount {
+func NewBankAccountRepository(repo repository.Repository) BankAccount {
 	return BankAccount{
-		repo: backAccount,
+		repo: repo,
 	}
 }
 
@@ -33,7 +33,7 @@ func (c BankAccount) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	input.UserID, _ = library.GetUserID(ctx)
 
-	err = c.repo.Create(input)
+	err = c.repo.BANK_ACCOUNT.Create(input)
 	if err != nil {
 		return http.StatusInternalServerError, "bank account added failed", nil, err
 	}
@@ -46,7 +46,7 @@ func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	userID, _ := library.GetUserID(ctx)
 
 	id := ctx.Params("id")
-	_, err := c.repo.GetByID(id, userID)
+	_, err := c.repo.BANK_ACCOUNT.GetByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "bank account not found", nil, errors.New("bank account not found")
 	}
@@ -59,7 +59,7 @@ func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 	input.ID = id
 
-	err = c.repo.Update(input)
+	err = c.repo.BANK_ACCOUNT.Update(input)
 	if err != nil {
 		return http.StatusInternalServerError, "bank account updated failed", nil, err
 	}
@@ -72,12 +72,12 @@ func (c BankAccount) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	userID, _ := library.GetUserID(ctx)
 
 	id := ctx.Params("id")
-	_, err := c.repo.GetByID(id, userID)
+	_, err := c.repo.BANK_ACCOUNT.GetByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "bank account not found", nil, errors.New("bank account not found")
 	}
 
-	err = c.repo.Delete(id, userID)
+	err = c.repo.BANK_ACCOUNT.Delete(id, userID)
 	if err != nil {
 		return http.StatusInternalServerError, "bank account delete failed", nil, err
 	}
@@ -89,7 +89,7 @@ func (c BankAccount) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	userID, _ := library.GetUserID(ctx)
 
-	result, err := c.repo.List(userID)
+	result, err := c.repo.BANK_ACCOUNT.List(userID)
 	if err != nil {
 		return http.StatusInternalServerError, "list bank account error", nil, err
 	}

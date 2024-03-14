@@ -15,14 +15,14 @@ import (
 )
 
 type User struct {
-	repo       repository.User
+	repo       repository.Repository
 	jwt        library.JWT
 	bcryptSalt int
 }
 
-func NewUserController(user repository.User, jwt library.JWT, bcryptSalt int) User {
+func NewUserController(repo repository.Repository, jwt library.JWT, bcryptSalt int) User {
 	return User{
-		repo:       user,
+		repo:       repo,
 		jwt:        jwt,
 		bcryptSalt: bcryptSalt,
 	}
@@ -44,7 +44,7 @@ func (c User) Register(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, err.Error(), nil, err
 	}
 
-	existUser, _ := c.repo.GetByUsername(input.Username)
+	existUser, _ := c.repo.USER.GetByUsername(input.Username)
 	if existUser.ID != "" {
 		return http.StatusConflict, "username already exist", nil, errors.New("username existed")
 	}
@@ -56,7 +56,7 @@ func (c User) Register(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	input.Password = string(generated)
 
-	id, err := c.repo.Create(input)
+	id, err := c.repo.USER.Create(input)
 	if err != nil {
 		return http.StatusInternalServerError, "User registered failed", nil, err
 	}
@@ -90,7 +90,7 @@ func (c User) Login(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, err.Error(), nil, err
 	}
 
-	user, err := c.repo.GetByUsername(input.Username)
+	user, err := c.repo.USER.GetByUsername(input.Username)
 	if err != nil {
 		return http.StatusNotFound, "User not found", nil, err
 	}
