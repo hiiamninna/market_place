@@ -32,3 +32,15 @@ CREATE TABLE IF NOT EXISTS bank_accounts (
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY NOT NULL,
+    user_id INT NOT NULL,
+    bank_account_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    deleted_at TIMESTAMP
+);

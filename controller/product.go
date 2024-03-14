@@ -12,12 +12,12 @@ import (
 )
 
 type Product struct {
-	repo repository.Product
+	repo repository.Repository
 }
 
-func NewProductController(product repository.Product) Product {
+func NewProductController(repo repository.Repository) Product {
 	return Product{
-		repo: product,
+		repo: repo,
 	}
 }
 
@@ -33,7 +33,7 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	input.UserID, _ = library.GetUserID(ctx)
 
-	err = c.repo.Create(input)
+	err = c.repo.PRODUCT.Create(input)
 	if err != nil {
 		return http.StatusInternalServerError, "product added failed", nil, err
 	}
@@ -46,7 +46,7 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	userID, _ := library.GetUserID(ctx)
 
 	id := ctx.Params("id")
-	_, err := c.repo.GetOwnByID(id, userID)
+	_, err := c.repo.PRODUCT.GetOwnByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
 	}
@@ -59,7 +59,7 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 	input.ID = id
 
-	err = c.repo.Update(input)
+	err = c.repo.PRODUCT.Update(input)
 	if err != nil {
 		return http.StatusInternalServerError, "product updated failed", nil, err
 	}
@@ -72,12 +72,12 @@ func (c Product) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	userID, _ := library.GetUserID(ctx)
 
 	id := ctx.Params("id")
-	_, err := c.repo.GetOwnByID(id, userID)
+	_, err := c.repo.PRODUCT.GetOwnByID(id, userID)
 	if err != nil {
 		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
 	}
 
-	err = c.repo.Delete(id)
+	err = c.repo.PRODUCT.Delete(id)
 	if err != nil {
 		return http.StatusInternalServerError, "product delete failed", nil, err
 	}
@@ -98,12 +98,12 @@ func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	userID, _ := library.GetUserID(ctx)
 
 	input.ID = ctx.Params("id")
-	_, err = c.repo.GetOwnByID(input.ID, userID)
+	_, err = c.repo.PRODUCT.GetOwnByID(input.ID, userID)
 	if err != nil {
 		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
 	}
 
-	err = c.repo.UpdateStock(input.ID, input.Stock)
+	err = c.repo.PRODUCT.UpdateStock(input.ID, input.Stock)
 	if err != nil {
 		return http.StatusInternalServerError, "product update stock failed", nil, err
 	}
@@ -113,7 +113,7 @@ func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 func (c Product) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
-	result, err := c.repo.List()
+	result, err := c.repo.PRODUCT.List()
 	if err != nil {
 		return http.StatusInternalServerError, "list product error", nil, err
 	}
@@ -124,7 +124,7 @@ func (c Product) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
 func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	id := ctx.Params("id")
-	result, err := c.repo.GetByID(id)
+	result, err := c.repo.PRODUCT.GetByID(id)
 	if err != nil {
 		return http.StatusNotFound, "product not found", nil, errors.New("product not found")
 	}

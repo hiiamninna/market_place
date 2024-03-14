@@ -36,3 +36,12 @@ type BankAccountInput struct {
 	BankAccountName   string `json:"bankAccountName"`
 	BankAccountNumber string `json:"bankAccountNumber"`
 }
+
+type PaymentInput struct {
+	UserID        string
+	ProductID     string
+	BankAccountID string `json:"bankAccountId"`
+	PaymentProof  string `json:"paymentProofImageUrl"`
+	Quantity      int    `json:"quantity"`
+	TotalPayment  int
+}

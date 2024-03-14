@@ -62,12 +62,11 @@ func route() *fiber.App {
 		product.Patch("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Update))
 		product.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Delete))
 
+		product.Post("/:id/buy", context.JWT.Authentication(), ParseContext(context.CTL.PAYMENT.Create))
+		product.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
+
 		product.Get("", ParseContext(context.CTL.PRODUCT.List))
 		product.Get("/:id", ParseContext(context.CTL.PRODUCT.Get))
-	}
-	productStock := app.Group("/v1/product")
-	{
-		productStock.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
 	}
 
 	image := app.Group("/v1/image")
