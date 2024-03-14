@@ -39,7 +39,7 @@ func (c *User) Create(input collections.InputUserRegister) (int, error) {
 	return id, nil
 }
 
-func (c *User) GetByID(id int) (collections.User, error) {
+func (c *User) GetByID(id string) (collections.User, error) {
 
 	user := collections.User{}
 
