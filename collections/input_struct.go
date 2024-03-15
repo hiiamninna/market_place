@@ -24,6 +24,21 @@ type ProductInput struct {
 	IsPurchaseable bool     `json:"isPurchaseable"`
 }
 
+type ProductPageInput struct {
+	UserID         string
+	UserOnly       bool     `query:"userOnly"`
+	Limit          int      `query:"limit"`
+	Offset         int      `query:"offset"`
+	Tags           []string `query:"tags"`
+	Condition      string   `query:"condition"`
+	ShowEmptyStock bool     `query:"showEmptyStock"`
+	MaxPrice       int      `query:"maxPrice"`
+	MinPrice       int      `query:"minPrice"`
+	SortBy         string   `query:"sortBy"`
+	OrderBy        string   `query:"orderBy"`
+	Search         string   `query:"search"`
+}
+
 type ProductStockInput struct {
 	ID    string
 	Stock int `json:"stock" validate:"min:0"`

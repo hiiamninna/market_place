@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"market_place/collections"
 	"market_place/controller"
 	"market_place/library"
 	"market_place/repository"
@@ -65,7 +66,7 @@ func route() *fiber.App {
 		product.Post("/:id/buy", context.JWT.Authentication(), ParseContext(context.CTL.PAYMENT.Create))
 		product.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
 
-		product.Get("", ParseContext(context.CTL.PRODUCT.List))
+		product.Get("", ParseContextList(context.CTL.PRODUCT.List))
 		product.Get("/:id", ParseContext(context.CTL.PRODUCT.Get))
 	}
 
@@ -103,6 +104,24 @@ func ParseContext(f func(*fiber.Ctx) (int, string, interface{}, error)) func(*fi
 	}
 }
 
+func ParseContextList(f func(*fiber.Ctx) (int, string, collections.Meta, interface{}, error)) func(*fiber.Ctx) error {
+	return func(c *fiber.Ctx) error {
+		code, message, meta, resp, err := f(c)
+		c.Set("Content-Type", "application/json")
+
+		if err != nil {
+			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
+			errBody := Response(message, nil)
+			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
+			return c.Status(code).Send(errBody)
+		}
+
+		successBody := ResponseList(message, meta, resp)
+		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
+		return c.Status(code).Send(successBody)
+	}
+}
+
 func Response(message string, data interface{}) []byte {
 
 	response := struct {
@@ -111,6 +130,26 @@ func Response(message string, data interface{}) []byte {
 	}{
 		Message: message,
 		Data:    data,
+	}
+
+	value, err := json.Marshal(response)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+
+	return value
+}
+
+func ResponseList(message string, meta collections.Meta, data interface{}) []byte {
+
+	response := struct {
+		Message string           `json:"message"`
+		Data    interface{}      `json:"data"`
+		Meta    collections.Meta `json:"meta"`
+	}{
+		Message: message,
+		Data:    data,
+		Meta:    meta,
 	}
 
 	value, err := json.Marshal(response)

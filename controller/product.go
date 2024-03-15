@@ -122,14 +122,32 @@ func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	return http.StatusOK, "product stock update successfully", nil, err
 }
 
-func (c Product) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
+func (c Product) List(ctx *fiber.Ctx) (int, string, collections.Meta, interface{}, error) {
 
-	result, err := c.repo.PRODUCT.List()
-	if err != nil {
-		return http.StatusInternalServerError, "list product error", nil, err
+	input := collections.ProductPageInput{}
+	if err := ctx.QueryParser(&input); err != nil {
+		return http.StatusInternalServerError, "list product error", collections.Meta{}, nil, err
 	}
 
-	return http.StatusOK, "ok", result, err
+	input.UserID, _ = library.GetUserID(ctx)
+
+	result, err := c.repo.PRODUCT.List(input)
+	if err != nil {
+		return http.StatusInternalServerError, "list product error", collections.Meta{}, nil, err
+	}
+
+	totalRow, err := c.repo.PRODUCT.CountList(input)
+	if err != nil {
+		return http.StatusInternalServerError, "list product error", collections.Meta{}, nil, err
+	}
+
+	meta := collections.Meta{
+		Limit:  input.Limit,
+		Offset: input.Offset,
+		Total:  totalRow,
+	}
+
+	return http.StatusOK, "ok", meta, result, err
 }
 
 func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
