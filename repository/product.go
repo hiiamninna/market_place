@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"market_place/collections"
+	"strings"
 
 	"github.com/lib/pq"
 )
@@ -83,20 +84,88 @@ func (c *Product) GetByID(id string) (collections.Product, error) {
 	return p, nil
 }
 
-func (c *Product) List() ([]collections.Product, error) {
-	products := []collections.Product{}
+func (c *Product) List(input collections.ProductPageInput) ([]collections.ProductList, error) {
+	products := []collections.ProductList{}
+	var filter, order string
+	var values []interface{}
 
-	sql := `SELECT id, name, price, image_url, stock, condition, is_purchaseable, tags FROM products WHERE deleted_at is null;`
-	rows, err := c.db.Query(sql)
+	valuesCount := 1
+
+	isSort := false
+
+	sql := `SELECT products.id, products.name, products.price, products.image_url, 
+	products.stock, products.condition, products.is_purchaseable, products.tags, sum(payment.quantity)
+	FROM products
+	INNER JOIN payments on products.id = payments.products_id
+	WHERE products.deleted_at is null [filter] [order] [limit];`
+
+	if input.UserOnly {
+		filter += " AND products.user_id = $" + fmt.Sprint(valuesCount)
+		values = append(values, input.UserID)
+		valuesCount += 1
+	}
+
+	if len(input.Tags) > 0 {
+		filter += " AND products.tags = ANY($" + fmt.Sprint(valuesCount) + ")"
+		values = append(values, input.Tags)
+		valuesCount += 1
+	}
+
+	if input.Condition == "new" || input.Condition == "second" {
+		filter += " AND products.condition = $" + fmt.Sprint(valuesCount)
+		values = append(values, input.Condition)
+		valuesCount += 1
+	}
+
+	if !input.ShowEmptyStock {
+		filter += " AND products.stock > 0"
+	}
+
+	if input.MaxPrice > 0 {
+		filter += " AND products.price < $" + fmt.Sprint(valuesCount)
+		values = append(values, input.MaxPrice)
+		valuesCount += 1
+	}
+
+	if input.MinPrice > 0 {
+		filter += " AND products.price > $" + fmt.Sprint(valuesCount)
+		values = append(values, input.MinPrice)
+		valuesCount += 1
+	}
+
+	if input.Search != "" {
+		filter += " AND products.name ~* $" + fmt.Sprint(valuesCount)
+		values = append(values, input.Search)
+		valuesCount += 1
+	}
+
+	switch input.SortBy {
+	case "price":
+		order += " ORDER BY products.price "
+		isSort = true
+	case "date":
+		order += " ORDER BY products.created_at "
+		isSort = true
+	}
+
+	if isSort && input.OrderBy != "" {
+		order += " ORDER BY " + input.OrderBy
+	}
+
+	sql = strings.ReplaceAll(sql, "[filter]", filter)
+	sql = strings.ReplaceAll(sql, "[order]", order)
+	sql = strings.ReplaceAll(sql, "[limit]", fmt.Sprintf("limit %d offset %d", input.Limit, input.Offset))
+
+	rows, err := c.db.Query(sql, values)
 	if err != nil {
 		return products, fmt.Errorf("select list : %w", err)
 	}
 	defer rows.Close()
 
 	for rows.Next() {
-		p := collections.Product{}
+		p := collections.ProductList{}
 
-		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.ImageUrl, &p.Stock, &p.Condition, &p.IsPurchaseable, pq.Array(&p.Tags))
+		err := rows.Scan(&p.ProductID, &p.Name, &p.Price, &p.ImageURL, &p.Stock, &p.Condition, &p.IsPurchaseable, pq.Array(&p.Tags), &p.PurchaseCount)
 		if err != nil {
 			return products, fmt.Errorf("rows scan : %w", err)
 		}
@@ -105,6 +174,76 @@ func (c *Product) List() ([]collections.Product, error) {
 	}
 
 	return products, nil
+}
+
+func (c *Product) CountList(input collections.ProductPageInput) (int, error) {
+	var filter string
+	var values []interface{}
+
+	valuesCount := 1
+
+	sql := `SELECT count(*)
+	FROM products
+	INNER JOIN payments on products.id = payments.products_id
+	WHERE products.deleted_at is null [filter] `
+
+	if input.UserOnly {
+		filter += " AND products.user_id = $" + fmt.Sprint(valuesCount)
+		values = append(values, input.UserID)
+		valuesCount += 1
+	}
+
+	if len(input.Tags) > 0 {
+		filter += " AND products.tags = ANY($" + fmt.Sprint(valuesCount) + ")"
+		values = append(values, input.Tags)
+		valuesCount += 1
+	}
+
+	if input.Condition == "new" || input.Condition == "second" {
+		filter += " AND products.condition = $" + fmt.Sprint(valuesCount)
+		values = append(values, input.Condition)
+		valuesCount += 1
+	}
+
+	if !input.ShowEmptyStock {
+		filter += " AND products.stock > 0"
+	}
+
+	if input.MaxPrice > 0 {
+		filter += " AND products.price < $" + fmt.Sprint(valuesCount)
+		values = append(values, input.MaxPrice)
+		valuesCount += 1
+	}
+
+	if input.MinPrice > 0 {
+		filter += " AND products.price > $" + fmt.Sprint(valuesCount)
+		values = append(values, input.MinPrice)
+		valuesCount += 1
+	}
+
+	if input.Search != "" {
+		filter += " AND products.name ~* $" + fmt.Sprint(valuesCount)
+		values = append(values, input.Search)
+		valuesCount += 1
+	}
+
+	sql = strings.ReplaceAll(sql, "[filter]", filter)
+
+	rows, err := c.db.Query(sql, values)
+	if err != nil {
+		return 0, fmt.Errorf("select list : %w", err)
+	}
+	defer rows.Close()
+
+	var totalRow int
+	for rows.Next() {
+		err := rows.Scan(&totalRow)
+		if err != nil {
+			return 0, fmt.Errorf("rows scan : %w", err)
+		}
+	}
+
+	return totalRow, nil
 }
 
 func (c *Product) UpdateStock(id string, stock int) error {

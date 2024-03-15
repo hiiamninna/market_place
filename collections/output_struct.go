@@ -47,3 +47,21 @@ type ProductDetail struct {
 	Product Product `json:"product"`
 	Seller  Seller  `json:"seller"`
 }
+
+type ProductList struct {
+	ProductID      string   `json:"productId"`
+	Name           string   `json:"name"`
+	Price          int      `json:"price"`
+	ImageURL       string   `json:"imageUrl"`
+	Stock          int      `json:"stock"`
+	Condition      string   `json:"condition"`
+	Tags           []string `json:"tags"`
+	IsPurchaseable bool     `json:"isPurchaseable"`
+	PurchaseCount  int      `json:"purchaseCount"`
+}
+
+type Meta struct {
+	Limit  int `json:"limit"`
+	Offset int `json:"offset"`
+	Total  int `json:"total"`
+}
