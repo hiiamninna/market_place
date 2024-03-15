@@ -7,15 +7,16 @@ import (
 	"market_place/controller"
 	"market_place/library"
 	"market_place/repository"
-	"math/rand"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/adaptor"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -44,6 +45,8 @@ func route() *fiber.App {
 
 	// Use recover middleware to prevent crashes
 	app.Use(recover.New())
+	// Register the Prometheus metrics handler
+	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
 
 	// use this route to test
 	/**
@@ -58,6 +61,7 @@ func route() *fiber.App {
 		})
 	})
 	**/
+
 	user := app.Group("/v1/user")
 	{
 		user.Post("/register", ParseContext(context.CTL.USER.Register))
@@ -75,6 +79,10 @@ func route() *fiber.App {
 
 		product.Get("", ParseContextList(context.CTL.PRODUCT.List))
 		product.Get("/:id", ParseContext(context.CTL.PRODUCT.Get))
+
+		// Simplified route creation with NewRoute function, added to prometheus-grafana, monitoring
+		NewRoute(app, "/pg/v1/product/", "GET", ParseContextList(context.CTL.PRODUCT.List))
+		NewRoute(app, "/pg/v1/product/:id", "GET", ParseContext(context.CTL.PRODUCT.Get))
 	}
 
 	image := app.Group("/v1/image")
@@ -89,19 +97,6 @@ func route() *fiber.App {
 		bankAccount.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Delete))
 		bankAccount.Get("", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.List))
 	}
-
-	/**
-	// Register the Prometheus metrics handler
-	app.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
-
-	// Simplified route creation with NewRoute function
-	NewRoute(app, "/", "GET", helloHandler)
-	NewRoute(app, "/:userId", "GET", helloHandler)
-
-	// Start the server
-	fmt.Println("WEBSERVER IS RUNNING ON :8080")
-	log.Fatal(app.Listen(":8080"))
-	**/
 
 	return app
 }
@@ -223,8 +218,8 @@ func NewContext() (Context, error) {
 // PROMETHEUS n GRAFANA
 var (
 	helloRequestHistogram = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "hello_request",
-		Help:    "Histogram of the /hello request duration.",
+		Name:    "hiiamninna_request",
+		Help:    "Histogram of the /hiiamninna request duration.",
 		Buckets: prometheus.LinearBuckets(1, 1, 10), // Adjust bucket sizes as needed
 	}, []string{"path", "method", "status"})
 )
@@ -253,12 +248,4 @@ func wrapHandlerWithMetrics(path string, method string, handler fiber.Handler) f
 		helloRequestHistogram.WithLabelValues(path, method, statusCode).Observe(duration)
 		return err
 	}
-}
-
-func helloHandler(c *fiber.Ctx) error {
-	// Simulating processing time
-	randomSeconds := rand.Intn(11)
-	time.Sleep(time.Duration(randomSeconds) * time.Second)
-
-	return c.SendString("hello world " + c.Params("userId", ""))
 }
