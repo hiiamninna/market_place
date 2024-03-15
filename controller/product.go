@@ -129,7 +129,12 @@ func (c Product) List(ctx *fiber.Ctx) (int, string, collections.Meta, interface{
 		return http.StatusInternalServerError, "list product error", collections.Meta{}, nil, err
 	}
 
-	input.UserID, _ = library.GetUserID(ctx)
+	if input.UserOnly {
+		input.UserID, _ = library.GetUserID(ctx)
+		if input.UserID == "" {
+			return http.StatusForbidden, "you must login", collections.Meta{}, nil, errors.New("must login")
+		}
+	}
 
 	result, err := c.repo.PRODUCT.List(input)
 	if err != nil {
