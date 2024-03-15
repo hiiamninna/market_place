@@ -55,8 +55,10 @@ func GetUserID(context *fiber.Ctx) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("get all session : %w", err)
 	}
-	userID := maps[`user_id`].(string)
-	return userID, nil
+	if maps != nil {
+		return maps[`user_id`].(string), nil
+	}
+	return "", nil
 }
 
 func DeleteSession(context *fiber.Ctx) (string, error) {

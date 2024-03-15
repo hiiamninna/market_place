@@ -94,10 +94,10 @@ func (c *Product) List(input collections.ProductPageInput) ([]collections.Produc
 	isSort := false
 
 	sql := `SELECT products.id, products.name, products.price, products.image_url, 
-	products.stock, products.condition, products.is_purchaseable, products.tags, sum(payment.quantity)
+	products.stock, products.condition, products.is_purchaseable, products.tags, sum(payments.quantity)
 	FROM products
-	INNER JOIN payments on products.id = payments.products_id
-	WHERE products.deleted_at is null [filter] [order] [limit];`
+	INNER JOIN payments on products.id = payments.product_id
+	WHERE products.deleted_at is null [filter] group by products.id [order] [limit];`
 
 	if input.UserOnly {
 		filter += " AND products.user_id = $" + fmt.Sprint(valuesCount)
@@ -106,9 +106,16 @@ func (c *Product) List(input collections.ProductPageInput) ([]collections.Produc
 	}
 
 	if len(input.Tags) > 0 {
-		filter += " AND products.tags = ANY($" + fmt.Sprint(valuesCount) + ")"
-		values = append(values, input.Tags)
-		valuesCount += 1
+		filter += " AND ("
+		for i, v := range input.Tags {
+			filter += "$" + fmt.Sprint(valuesCount) + " = ANY(products.tags)"
+			values = append(values, v)
+			valuesCount += 1
+			if i+1 < len(input.Tags) {
+				filter += " OR "
+			}
+		}
+		filter += ")"
 	}
 
 	if input.Condition == "new" || input.Condition == "second" {
@@ -154,9 +161,13 @@ func (c *Product) List(input collections.ProductPageInput) ([]collections.Produc
 
 	sql = strings.ReplaceAll(sql, "[filter]", filter)
 	sql = strings.ReplaceAll(sql, "[order]", order)
-	sql = strings.ReplaceAll(sql, "[limit]", fmt.Sprintf("limit %d offset %d", input.Limit, input.Offset))
+	if input.Limit != 0 {
+		sql = strings.ReplaceAll(sql, "[limit]", fmt.Sprintf("limit %d offset %d", input.Limit, input.Offset))
+	} else {
+		sql = strings.ReplaceAll(sql, "[limit]", "")
+	}
 
-	rows, err := c.db.Query(sql, values)
+	rows, err := c.db.Query(sql, values...)
 	if err != nil {
 		return products, fmt.Errorf("select list : %w", err)
 	}
@@ -184,7 +195,7 @@ func (c *Product) CountList(input collections.ProductPageInput) (int, error) {
 
 	sql := `SELECT count(*)
 	FROM products
-	INNER JOIN payments on products.id = payments.products_id
+	INNER JOIN payments on products.id = payments.product_id
 	WHERE products.deleted_at is null [filter] `
 
 	if input.UserOnly {
@@ -194,9 +205,16 @@ func (c *Product) CountList(input collections.ProductPageInput) (int, error) {
 	}
 
 	if len(input.Tags) > 0 {
-		filter += " AND products.tags = ANY($" + fmt.Sprint(valuesCount) + ")"
-		values = append(values, input.Tags)
-		valuesCount += 1
+		filter += " AND ("
+		for i, v := range input.Tags {
+			filter += "$" + fmt.Sprint(valuesCount) + " = ANY(products.tags)"
+			values = append(values, v)
+			valuesCount += 1
+			if i+1 < len(input.Tags) {
+				filter += " OR "
+			}
+		}
+		filter += ")"
 	}
 
 	if input.Condition == "new" || input.Condition == "second" {
@@ -229,9 +247,9 @@ func (c *Product) CountList(input collections.ProductPageInput) (int, error) {
 
 	sql = strings.ReplaceAll(sql, "[filter]", filter)
 
-	rows, err := c.db.Query(sql, values)
+	rows, err := c.db.Query(sql, values...)
 	if err != nil {
-		return 0, fmt.Errorf("select list : %w", err)
+		return 0, fmt.Errorf("count list : %w", err)
 	}
 	defer rows.Close()
 
