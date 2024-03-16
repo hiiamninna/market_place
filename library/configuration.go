@@ -29,6 +29,7 @@ func NewConfiguration() (Config, error) {
 		JWTSecret:      EnvString("JWT_SECRET"),
 		BcryptSalt:     EnvInt("BCRYPT_SALT"),
 		DB: Database{
+			Env:      EnvString("ENV"),
 			Name:     EnvString("DB_NAME"),
 			Host:     EnvString("DB_HOST"),
 			Port:     EnvString("DB_PORT"),

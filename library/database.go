@@ -8,6 +8,7 @@ import (
 )
 
 type Database struct {
+	Env      string
 	Name     string
 	Host     string
 	Port     string
@@ -30,5 +31,8 @@ func NewDatabaseConnection(dbCfg Database) (*sql.DB, error) {
 }
 
 func dsn(dbCfg Database) string {
+	if dbCfg.Env == "production" {
+		return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=verify-full", dbCfg.Username, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name)
+	}
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbCfg.Username, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name)
 }
