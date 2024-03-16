@@ -16,7 +16,7 @@ func NewUserRepository(db *sql.DB) User {
 	}
 }
 
-func (c *User) Create(input collections.InputUserRegister) (int, error) {
+func (c User) Create(input collections.InputUserRegister) (int, error) {
 
 	var id int
 	sql :=
@@ -39,7 +39,7 @@ func (c *User) Create(input collections.InputUserRegister) (int, error) {
 	return id, nil
 }
 
-func (c *User) GetByID(id string) (collections.User, error) {
+func (c User) GetByID(id string) (collections.User, error) {
 
 	user := collections.User{}
 
@@ -52,7 +52,7 @@ func (c *User) GetByID(id string) (collections.User, error) {
 	return user, nil
 }
 
-func (c *User) GetByUsername(username string) (collections.User, error) {
+func (c User) GetByUsername(username string) (collections.User, error) {
 
 	user := collections.User{}
 

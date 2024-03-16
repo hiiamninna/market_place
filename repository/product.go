@@ -19,7 +19,7 @@ func NewProductRepository(db *sql.DB) Product {
 	}
 }
 
-func (c *Product) Create(input collections.ProductInput) error {
+func (c Product) Create(input collections.ProductInput) error {
 
 	sql :=
 		`INSERT INTO 
@@ -35,7 +35,7 @@ func (c *Product) Create(input collections.ProductInput) error {
 	return nil
 }
 
-func (c *Product) Update(input collections.ProductInput) error {
+func (c Product) Update(input collections.ProductInput) error {
 	sql :=
 		`UPDATE products 
 		SET name = $1, price = $2, condition = $3, is_purchaseable = $4, tags = $5, updated_at = current_timestamp
@@ -48,7 +48,7 @@ func (c *Product) Update(input collections.ProductInput) error {
 	return nil
 }
 
-func (c *Product) Delete(id string) error {
+func (c Product) Delete(id string) error {
 	sql := `UPDATE products SET deleted_at = current_timestamp WHERE id = $1;`
 	_, err := c.db.Exec(sql, id)
 	if err != nil {
@@ -58,7 +58,7 @@ func (c *Product) Delete(id string) error {
 	return nil
 }
 
-func (c *Product) GetOwnByID(id, userID string) (collections.Product, error) {
+func (c Product) GetOwnByID(id, userID string) (collections.Product, error) {
 
 	p := collections.Product{}
 
@@ -71,7 +71,7 @@ func (c *Product) GetOwnByID(id, userID string) (collections.Product, error) {
 	return p, nil
 }
 
-func (c *Product) GetByID(id string) (collections.Product, error) {
+func (c Product) GetByID(id string) (collections.Product, error) {
 
 	p := collections.Product{}
 
@@ -84,7 +84,7 @@ func (c *Product) GetByID(id string) (collections.Product, error) {
 	return p, nil
 }
 
-func (c *Product) List(input collections.ProductPageInput) ([]collections.ProductList, error) {
+func (c Product) List(input collections.ProductPageInput) ([]collections.ProductList, error) {
 	products := []collections.ProductList{}
 	var filter, order string
 	var values []interface{}
@@ -187,7 +187,7 @@ func (c *Product) List(input collections.ProductPageInput) ([]collections.Produc
 	return products, nil
 }
 
-func (c *Product) CountList(input collections.ProductPageInput) (int, error) {
+func (c Product) CountList(input collections.ProductPageInput) (int, error) {
 	var filter string
 	var values []interface{}
 
@@ -264,7 +264,7 @@ func (c *Product) CountList(input collections.ProductPageInput) (int, error) {
 	return totalRow, nil
 }
 
-func (c *Product) UpdateStock(id string, stock int) error {
+func (c Product) UpdateStock(id string, stock int) error {
 
 	sql := `UPDATE products SET stock = $1 WHERE id = $2;`
 	_, err := c.db.Exec(sql, stock, id)

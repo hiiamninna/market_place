@@ -16,7 +16,7 @@ func NewBankAccountRepository(db *sql.DB) BankAccount {
 	}
 }
 
-func (c *BankAccount) Create(input collections.BankAccountInput) error {
+func (c BankAccount) Create(input collections.BankAccountInput) error {
 
 	sql :=
 		`INSERT INTO
@@ -32,7 +32,7 @@ func (c *BankAccount) Create(input collections.BankAccountInput) error {
 	return nil
 }
 
-func (c *BankAccount) Update(input collections.BankAccountInput) error {
+func (c BankAccount) Update(input collections.BankAccountInput) error {
 
 	sql :=
 		`UPDATE bank_accounts 
@@ -46,7 +46,7 @@ func (c *BankAccount) Update(input collections.BankAccountInput) error {
 	return nil
 }
 
-func (c *BankAccount) Delete(id, userID string) error {
+func (c BankAccount) Delete(id, userID string) error {
 	sql := `UPDATE bank_accounts SET deleted_at = current_timestamp WHERE id = $1 AND user_id = $2;`
 	_, err := c.db.Exec(sql, id, userID)
 	if err != nil {
@@ -56,7 +56,7 @@ func (c *BankAccount) Delete(id, userID string) error {
 	return nil
 }
 
-func (c *BankAccount) GetByID(id, userID string) (collections.BankAccount, error) {
+func (c BankAccount) GetByID(id, userID string) (collections.BankAccount, error) {
 
 	bankAccount := collections.BankAccount{}
 
@@ -69,7 +69,7 @@ func (c *BankAccount) GetByID(id, userID string) (collections.BankAccount, error
 	return bankAccount, nil
 }
 
-func (c *BankAccount) List(userID string) ([]collections.BankAccount, error) {
+func (c BankAccount) List(userID string) ([]collections.BankAccount, error) {
 	bankAccounts := []collections.BankAccount{}
 
 	sql := `SELECT TEXT(id), name, account_name, account_number FROM bank_accounts WHERE user_id = $1 AND deleted_at is null;`
