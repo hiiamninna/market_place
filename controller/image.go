@@ -63,7 +63,7 @@ func (c Image) ImageUpload(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		if err != nil {
 			return http.StatusInternalServerError, "upload image fail", nil, err
 		}
-		url, err = c.S3.UploadFile(uploadedFile, name)
+		url, err = c.S3.UploadFile(uploadedFile, name+ext)
 		if err != nil {
 			return http.StatusInternalServerError, "upload image fail", nil, err
 		}

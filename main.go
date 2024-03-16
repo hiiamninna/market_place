@@ -7,6 +7,7 @@ import (
 	"market_place/controller"
 	"market_place/library"
 	"market_place/repository"
+	"net/http"
 	"os"
 	"os/signal"
 	"time"
@@ -121,6 +122,9 @@ func route() *fiber.App {
 
 	// bank account --------------------------------------------------------------------------------------------
 	NewRoute(app, context, "/v1/bank/account", "POST", true, context.CTL.BANK_ACCOUNT.Create)
+	app.Patch("/v1/bank/account", context.JWT.Authentication(), func(c *fiber.Ctx) error {
+		return c.SendStatus(http.StatusNotFound)
+	})
 	NewRoute(app, context, "/v1/bank/account/:id", "PATCH", true, context.CTL.BANK_ACCOUNT.Update)
 	NewRoute(app, context, "/v1/bank/account/:id", "DELETE", true, context.CTL.BANK_ACCOUNT.Delete)
 	NewRoute(app, context, "/v1/bank/account", "GET", true, context.CTL.BANK_ACCOUNT.List)
