@@ -38,7 +38,6 @@ func (c User) Register(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
-	// set validation here
 	err = library.Validate(input)
 	if err != nil {
 		return http.StatusBadRequest, err.Error(), nil, err

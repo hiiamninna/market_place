@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"market_place/collections"
 	"market_place/library"
 	"market_place/repository"
@@ -30,7 +31,16 @@ func (c Payment) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
+	err = library.Validate(input)
+	if err != nil {
+		return http.StatusBadRequest, err.Error(), nil, err
+	}
+
 	input.UserID, _ = library.GetUserID(ctx)
+	if input.UserID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
+
 	_, err = c.repo.BANK_ACCOUNT.GetByID(input.BankAccountID, input.UserID)
 	if err != nil {
 		return http.StatusBadRequest, "incorrect payment information", nil, err

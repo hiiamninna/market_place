@@ -33,10 +33,17 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 
 	input.UserID, _ = library.GetUserID(ctx)
+	if input.UserID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	err = library.Validate(input)
 	if err != nil {
 		return http.StatusBadRequest, err.Error(), nil, err
+	}
+
+	if len(input.Tags) < 1 {
+		input.Tags = make([]string, 0)
 	}
 
 	err = c.repo.PRODUCT.Create(input)
@@ -50,6 +57,9 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	userID, _ := library.GetUserID(ctx)
+	if userID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	id := ctx.Params("id")
 	_, err := c.repo.PRODUCT.GetOwnByID(id, userID)
@@ -70,6 +80,10 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, err.Error(), nil, err
 	}
 
+	if len(input.Tags) < 1 {
+		input.Tags = make([]string, 0)
+	}
+
 	err = c.repo.PRODUCT.Update(input)
 	if err != nil {
 		return http.StatusInternalServerError, "product updated failed", nil, err
@@ -81,6 +95,9 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 func (c Product) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	userID, _ := library.GetUserID(ctx)
+	if userID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	id := ctx.Params("id")
 	_, err := c.repo.PRODUCT.GetOwnByID(id, userID)
@@ -106,7 +123,15 @@ func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
+	err = library.Validate(input)
+	if err != nil {
+		return http.StatusBadRequest, err.Error(), nil, err
+	}
+
 	userID, _ := library.GetUserID(ctx)
+	if userID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	input.ID = ctx.Params("id")
 	_, err = c.repo.PRODUCT.GetOwnByID(input.ID, userID)
@@ -168,23 +193,23 @@ func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	productDetail.Product.PurchaseCount, err = c.repo.PAYMENT.GetPurchaseCountByProductID(id)
 	if err != nil {
-		fmt.Errorf("get purchase count : %w", err)
+		return http.StatusInternalServerError, "internal error", nil, fmt.Errorf("get purchase count : %w", err)
 	}
 
 	seller, err := c.repo.USER.GetByID(productDetail.Product.UserID)
 	if err != nil {
-		fmt.Errorf("get seller : %w", err)
+		return http.StatusInternalServerError, "internal error", nil, fmt.Errorf("get seller : %w", err)
 	}
 
 	productDetail.Seller.Name = seller.Name
 	productDetail.Seller.ProductSoldTotal, err = c.repo.PAYMENT.GetProductSoldTotalByUser(seller.ID)
 	if err != nil {
-		fmt.Errorf("get product sold total : %w", err)
+		return http.StatusInternalServerError, "internal error", nil, fmt.Errorf("get product sold total : %w", err)
 	}
 
 	productDetail.Seller.BankAccounts, err = c.repo.BANK_ACCOUNT.List(seller.ID)
 	if err != nil {
-		fmt.Errorf("get bank accounts : %w", err)
+		return http.StatusInternalServerError, "internal error", nil, fmt.Errorf("get bank accounts : %w", err)
 	}
 
 	return http.StatusOK, "ok", productDetail, err

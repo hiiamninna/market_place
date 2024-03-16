@@ -69,5 +69,5 @@ func (c Image) ImageUpload(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		}
 	}
 
-	return http.StatusOK, "image uploaded", collections.FileUpload{ImageUrl: url}, err
+	return http.StatusOK, "image uploaded successfully", collections.FileUpload{ImageUrl: url}, err
 }
