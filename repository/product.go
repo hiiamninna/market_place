@@ -94,9 +94,9 @@ func (c *Product) List(input collections.ProductPageInput) ([]collections.Produc
 	isSort := false
 
 	sql := `SELECT products.id, products.name, products.price, products.image_url, 
-	products.stock, products.condition, products.is_purchaseable, products.tags, sum(payments.quantity)
+	products.stock, products.condition, products.is_purchaseable, products.tags, COALESCE(sum(payments.quantity),0)
 	FROM products
-	INNER JOIN payments on products.id = payments.product_id
+	LEFT JOIN payments on products.id = payments.product_id
 	WHERE products.deleted_at is null [filter] group by products.id [order] [limit];`
 
 	if input.UserOnly {
@@ -195,7 +195,7 @@ func (c *Product) CountList(input collections.ProductPageInput) (int, error) {
 
 	sql := `SELECT count(*)
 	FROM products
-	INNER JOIN payments on products.id = payments.product_id
+	LEFT JOIN payments on products.id = payments.product_id
 	WHERE products.deleted_at is null [filter] `
 
 	if input.UserOnly {

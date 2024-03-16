@@ -31,7 +31,15 @@ func (c BankAccount) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
+	err = library.Validate(input)
+	if err != nil {
+		return http.StatusBadRequest, err.Error(), nil, err
+	}
+
 	input.UserID, _ = library.GetUserID(ctx)
+	if input.UserID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	err = c.repo.BANK_ACCOUNT.Create(input)
 	if err != nil {
@@ -44,6 +52,9 @@ func (c BankAccount) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	userID, _ := library.GetUserID(ctx)
+	if userID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	id := ctx.Params("id")
 	_, err := c.repo.BANK_ACCOUNT.GetByID(id, userID)
@@ -57,6 +68,12 @@ func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	if err != nil {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
+
+	err = library.Validate(input)
+	if err != nil {
+		return http.StatusBadRequest, err.Error(), nil, err
+	}
+
 	input.ID = id
 
 	err = c.repo.BANK_ACCOUNT.Update(input)
@@ -70,6 +87,9 @@ func (c BankAccount) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 func (c BankAccount) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	userID, _ := library.GetUserID(ctx)
+	if userID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	id := ctx.Params("id")
 	_, err := c.repo.BANK_ACCOUNT.GetByID(id, userID)
@@ -88,6 +108,9 @@ func (c BankAccount) Delete(ctx *fiber.Ctx) (int, string, interface{}, error) {
 func (c BankAccount) List(ctx *fiber.Ctx) (int, string, interface{}, error) {
 
 	userID, _ := library.GetUserID(ctx)
+	if userID == "" {
+		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
+	}
 
 	result, err := c.repo.BANK_ACCOUNT.List(userID)
 	if err != nil {

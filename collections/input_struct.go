@@ -8,8 +8,8 @@ type InputUserRegister struct {
 }
 
 type UserLoginInput struct {
-	Username string `json:"username" validate:"required"`
-	Password string `json:"password" validate:"required"`
+	Username string `json:"username" validate:"required;min:5;max:15"`
+	Password string `json:"password" validate:"required;min:5;max:15"`
 }
 
 type ProductInput struct {
@@ -17,7 +17,7 @@ type ProductInput struct {
 	UserID         string
 	Name           string   `json:"name" validate:"required;min:5;max:60"`
 	Price          int      `json:"price" validate:"min:0"`
-	ImageUrl       string   `json:"imageUrl" validate:"url"`
+	ImageUrl       string   `json:"imageUrl" validate:"required;url"`
 	Stock          int      `json:"stock" validate:"min:0"`
 	Condition      string   `json:"condition" validate:"required;enum:condition"`
 	Tags           []string `json:"tags"`
