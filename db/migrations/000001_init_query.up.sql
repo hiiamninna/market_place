@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS products (
     stock INT,
     condition VARCHAR(10),
     is_purchaseable BOOLEAN DEFAULT TRUE,
+    tags VARCHAR[],
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP
@@ -40,6 +41,7 @@ CREATE TABLE IF NOT EXISTS payments (
     product_id INT NOT NULL,
     quantity INT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
+    total_payment INT,
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     deleted_at TIMESTAMP
