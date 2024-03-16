@@ -32,7 +32,7 @@ func NewDatabaseConnection(dbCfg Database) (*sql.DB, error) {
 
 func dsn(dbCfg Database) string {
 	if dbCfg.Env == "production" {
-		return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=verify-full&&sslrootcert=ap-southeast-1-bundle.pem", dbCfg.Username, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name)
+		return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=verify-full&sslrootcert=ap-southeast-1-bundle.pem", dbCfg.Username, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name)
 	}
 	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", dbCfg.Username, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name)
 }
