@@ -62,80 +62,107 @@ func route() *fiber.App {
 	})
 	**/
 
-	user := app.Group("/v1/user")
-	{
-		user.Post("/register", ParseContext(context.CTL.USER.Register))
-		user.Post("/login", ParseContext(context.CTL.USER.Login))
-	}
+	// user := app.Group("/v1/user")
+	// {
+	// 	user.Post("/register", ParseContext(context.CTL.USER.Register))
+	// 	user.Post("/login", ParseContext(context.CTL.USER.Login))
+	// }
 
-	product := app.Group("/v1/product")
-	{
-		product.Post("", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Create))
-		product.Patch("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Update))
-		product.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Delete))
+	// product := app.Group("/v1/product")
+	// {
+	// 	product.Post("", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Create))
+	// 	product.Patch("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Update))
+	// 	product.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.Delete))
 
-		product.Post("/:id/buy", context.JWT.Authentication(), ParseContext(context.CTL.PAYMENT.Create))
-		product.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
+	// 	product.Post("/:id/buy", context.JWT.Authentication(), ParseContext(context.CTL.PAYMENT.Create))
+	// 	product.Post("/:id/stock", context.JWT.Authentication(), ParseContext(context.CTL.PRODUCT.UpdateStock))
 
-		product.Get("", ParseContextList(context.CTL.PRODUCT.List))
-		product.Get("/:id", ParseContext(context.CTL.PRODUCT.Get))
+	// 	product.Get("", ParseContextList(context.CTL.PRODUCT.List))
+	// 	product.Get("/:id", ParseContext(context.CTL.PRODUCT.Get))
 
-		// Simplified route creation with NewRoute function, added to prometheus-grafana, monitoring
-		NewRoute(app, "/pg/v1/product/", "GET", ParseContextList(context.CTL.PRODUCT.List))
-		NewRoute(app, "/pg/v1/product/:id", "GET", ParseContext(context.CTL.PRODUCT.Get))
-	}
+	// 	// // Simplified route creation with NewRoute function, added to prometheus-grafana, monitoring
+	// 	// NewRoute(app, "/pg/v1/product/", "GET", ParseContextList(context.CTL.PRODUCT.List))
+	// 	// NewRoute(app, "/pg/v1/product/:id", "GET", ParseContext(context.CTL.PRODUCT.Get))
+	// }
 
-	image := app.Group("/v1/image")
-	{
-		image.Post("", context.JWT.Authentication(), ParseContext(context.CTL.IMAGE.ImageUpload))
-	}
+	// image := app.Group("/v1/image")
+	// {
+	// 	image.Post("", context.JWT.Authentication(), ParseContext(context.CTL.IMAGE.ImageUpload))
+	// }
 
-	bankAccount := app.Group("/v1/bank/account")
-	{
-		bankAccount.Post("", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Create))
-		bankAccount.Patch("/:id", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Update))
-		bankAccount.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Delete))
-		bankAccount.Get("", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.List))
-	}
+	// bankAccount := app.Group("/v1/bank/account")
+	// {
+	// 	bankAccount.Post("", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Create))
+	// 	bankAccount.Patch("/:id", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Update))
+	// 	bankAccount.Delete("/:id", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.Delete))
+	// 	bankAccount.Get("", context.JWT.Authentication(), ParseContext(context.CTL.BANK_ACCOUNT.List))
+	// }
+
+	// route with matrics
+
+	// user ----------------------------------------------------------------------------------------------------
+	NewRoute(app, context, "/v1/user/register", "POST", false, context.CTL.USER.Register)
+	NewRoute(app, context, "/v1/user/login", "POST", false, context.CTL.USER.Login)
+
+	// product -------------------------------------------------------------------------------------------------
+	NewRoute(app, context, "/v1/product", "POST", true, context.CTL.PRODUCT.Create)
+	NewRoute(app, context, "/v1/product/:id", "PATCH", true, context.CTL.PRODUCT.Update)
+	NewRoute(app, context, "/v1/product/:id", "DELETE", true, context.CTL.PRODUCT.Delete)
+	NewRoute(app, context, "/v1/product/:id/stock", "POST", true, context.CTL.PRODUCT.Update)
+
+	NewRouteList(app, context, "/v1/product", "GET", false, context.CTL.PRODUCT.List)
+	NewRoute(app, context, "/v1/product/:id", "GET", false, context.CTL.PRODUCT.Get)
+
+	// payment -------------------------------------------------------------------------------------------------
+	NewRoute(app, context, "/v1/product/:id/buy", "POST", true, context.CTL.PAYMENT.Create)
+
+	// image ---------------------------------------------------------------------------------------------------
+	NewRoute(app, context, "/v1/image", "POST", true, context.CTL.IMAGE.ImageUpload)
+
+	// bank account --------------------------------------------------------------------------------------------
+	NewRoute(app, context, "/v1/bank/account", "POST", true, context.CTL.BANK_ACCOUNT.Create)
+	NewRoute(app, context, "/v1/bank/account/:id", "PATCH", true, context.CTL.BANK_ACCOUNT.Update)
+	NewRoute(app, context, "/v1/bank/account/:id", "DELETE", true, context.CTL.BANK_ACCOUNT.Delete)
+	NewRoute(app, context, "/v1/bank/account", "GET", true, context.CTL.BANK_ACCOUNT.List)
 
 	return app
 }
 
-func ParseContext(f func(*fiber.Ctx) (int, string, interface{}, error)) func(*fiber.Ctx) error {
-	return func(c *fiber.Ctx) error {
-		code, message, resp, err := f(c)
-		c.Set("Content-Type", "application/json")
+// func ParseContext(f func(*fiber.Ctx) (int, string, interface{}, error)) func(*fiber.Ctx) error {
+// 	return func(c *fiber.Ctx) error {
+// 		code, message, resp, err := f(c)
+// 		c.Set("Content-Type", "application/json")
 
-		if err != nil {
-			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
-			errBody := Response(message, nil)
-			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
-			return c.Status(code).Send(errBody)
-		}
+// 		if err != nil {
+// 			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
+// 			errBody := Response(message, nil)
+// 			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
+// 			return c.Status(code).Send(errBody)
+// 		}
 
-		successBody := Response(message, resp)
-		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
-		return c.Status(code).Send(successBody)
-	}
-}
+// 		successBody := Response(message, resp)
+// 		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
+// 		return c.Status(code).Send(successBody)
+// 	}
+// }
 
-func ParseContextList(f func(*fiber.Ctx) (int, string, collections.Meta, interface{}, error)) func(*fiber.Ctx) error {
-	return func(c *fiber.Ctx) error {
-		code, message, meta, resp, err := f(c)
-		c.Set("Content-Type", "application/json")
+// func ParseContextList(f func(*fiber.Ctx) (int, string, collections.Meta, interface{}, error)) func(*fiber.Ctx) error {
+// 	return func(c *fiber.Ctx) error {
+// 		code, message, meta, resp, err := f(c)
+// 		c.Set("Content-Type", "application/json")
 
-		if err != nil {
-			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
-			errBody := Response(message, nil)
-			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
-			return c.Status(code).Send(errBody)
-		}
+// 		if err != nil {
+// 			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
+// 			errBody := Response(message, nil)
+// 			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
+// 			return c.Status(code).Send(errBody)
+// 		}
 
-		successBody := ResponseList(message, meta, resp)
-		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
-		return c.Status(code).Send(successBody)
-	}
-}
+// 		successBody := ResponseList(message, meta, resp)
+// 		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
+// 		return c.Status(code).Send(successBody)
+// 	}
+// }
 
 func Response(message string, data interface{}) []byte {
 
@@ -217,35 +244,99 @@ func NewContext() (Context, error) {
 
 // PROMETHEUS n GRAFANA
 var (
-	helloRequestHistogram = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "hiiamninna_request",
-		Help:    "Histogram of the /hiiamninna request duration.",
+	RequestHistogram = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "http_request",
+		Help:    "Histogram of the http request duration.",
 		Buckets: prometheus.LinearBuckets(1, 1, 10), // Adjust bucket sizes as needed
 	}, []string{"path", "method", "status"})
 )
 
-func NewRoute(app *fiber.App, path string, method string, handler fiber.Handler) {
-	app.Add(method, path, wrapHandlerWithMetrics(path, method, handler))
+func NewRoute(app *fiber.App, ctx Context, path string, method string, useAuth bool, handler func(*fiber.Ctx) (int, string, interface{}, error)) {
+	if useAuth {
+		app.Add(method, path, ctx.JWT.Authentication(), parseContextWithMatrics(path, method, handler))
+	} else {
+		app.Add(method, path, parseContextWithMatrics(path, method, handler))
+	}
 }
 
-func wrapHandlerWithMetrics(path string, method string, handler fiber.Handler) fiber.Handler {
+func NewRouteList(app *fiber.App, ctx Context, path string, method string, useAuth bool, handler func(*fiber.Ctx) (int, string, collections.Meta, interface{}, error)) {
+	if useAuth {
+		app.Add(method, path, ctx.JWT.Authentication(), parseContextListWithMatrics(path, method, handler))
+	} else {
+		app.Add(method, path, parseContextListWithMatrics(path, method, handler))
+	}
+}
+
+// func wrapHandlerWithMetrics(path string, method string, handler fiber.Handler) fiber.Handler {
+// 	return func(c *fiber.Ctx) error {
+// 		startTime := time.Now()
+
+// 		// Execute the actual handler and catch any errors
+// 		err := handler(c)
+
+// 		// Regardless of whether an error occurred, record the metrics
+// 		duration := time.Since(startTime).Seconds()
+// 		statusCode := fmt.Sprintf("%d", c.Response().StatusCode())
+// 		if err != nil {
+// 			if c.Response().StatusCode() == fiber.StatusOK { // Default status code
+// 				statusCode = "500" // Assume internal server error if not set
+// 			}
+// 			c.Status(fiber.StatusInternalServerError).SendString(err.Error()) // Ensure the response reflects the error
+// 		}
+
+// 		RequestHistogram.WithLabelValues(path, method, statusCode).Observe(duration)
+// 		return err
+// 	}
+// }
+
+func parseContextWithMatrics(path string, method string, f func(*fiber.Ctx) (int, string, interface{}, error)) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		startTime := time.Now()
 
-		// Execute the actual handler and catch any errors
-		err := handler(c)
+		code, message, resp, err := f(c)
 
-		// Regardless of whether an error occurred, record the metrics
 		duration := time.Since(startTime).Seconds()
+
 		statusCode := fmt.Sprintf("%d", c.Response().StatusCode())
+
+		c.Set("Content-Type", "application/json")
+
 		if err != nil {
-			if c.Response().StatusCode() == fiber.StatusOK { // Default status code
-				statusCode = "500" // Assume internal server error if not set
-			}
-			c.Status(fiber.StatusInternalServerError).SendString(err.Error()) // Ensure the response reflects the error
+			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
+			errBody := Response(message, nil)
+			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
+			return c.Status(code).Send(errBody)
 		}
 
-		helloRequestHistogram.WithLabelValues(path, method, statusCode).Observe(duration)
-		return err
+		RequestHistogram.WithLabelValues(path, method, statusCode).Observe(duration)
+		successBody := Response(message, resp)
+		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
+		return c.Status(code).Send(successBody)
+	}
+}
+
+func parseContextListWithMatrics(path string, method string, f func(*fiber.Ctx) (int, string, collections.Meta, interface{}, error)) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		startTime := time.Now()
+
+		code, message, meta, resp, err := f(c)
+
+		duration := time.Since(startTime).Seconds()
+
+		statusCode := fmt.Sprintf("%d", c.Response().StatusCode())
+
+		c.Set("Content-Type", "application/json")
+
+		if err != nil {
+			fmt.Println(time.Now().Format("2006-01-02 15:01:02 "), err)
+			errBody := Response(message, nil)
+			c.Set("Content-Length", fmt.Sprintf("%d", len(errBody)))
+			return c.Status(code).Send(errBody)
+		}
+
+		RequestHistogram.WithLabelValues(path, method, statusCode).Observe(duration)
+		successBody := ResponseList(message, meta, resp)
+		c.Set("Content-Length", fmt.Sprintf("%d", len(successBody)))
+		return c.Status(code).Send(successBody)
 	}
 }
