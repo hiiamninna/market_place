@@ -42,11 +42,6 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, message, nil, err
 	}
 
-	isEnum := c.isAnEnum(*input.Condition)
-	if !isEnum {
-		return http.StatusBadRequest, "not an enum", nil, err
-	}
-
 	isImage := library.IsAnImageUrl(*input.ImageUrl)
 	if !isImage {
 		return http.StatusBadRequest, "must an image url", nil, err
@@ -84,11 +79,6 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	message, err := library.ValidateInput(input)
 	if err != nil {
 		return http.StatusBadRequest, message, nil, err
-	}
-
-	isEnum := c.isAnEnum(*input.Condition)
-	if !isEnum {
-		return http.StatusBadRequest, "not an enum", nil, err
 	}
 
 	isImage := library.IsAnImageUrl(*input.ImageUrl)
@@ -225,11 +215,4 @@ func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 
 	return http.StatusOK, "ok", productDetail, err
-}
-
-func (c Product) isAnEnum(value string) bool {
-	if value != "new" && value != "second" {
-		return false
-	}
-	return true
 }
