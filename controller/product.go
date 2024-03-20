@@ -37,13 +37,19 @@ func (c Product) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusForbidden, "please check your credential", nil, errors.New("not login")
 	}
 
-	err = library.Validate(input)
+	message, err := library.ValidateInput(input)
 	if err != nil {
-		return http.StatusBadRequest, err.Error(), nil, err
+		return http.StatusBadRequest, message, nil, err
 	}
 
-	if len(input.Tags) < 1 {
-		input.Tags = make([]string, 0)
+	isEnum := c.isAnEnum(*input.Condition)
+	if !isEnum {
+		return http.StatusBadRequest, "not an enum", nil, err
+	}
+
+	isImage := library.IsAnImageUrl(*input.ImageUrl)
+	if !isImage {
+		return http.StatusBadRequest, "must an image url", nil, err
 	}
 
 	err = c.repo.PRODUCT.Create(input)
@@ -75,13 +81,19 @@ func (c Product) Update(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 	input.ID = id
 
-	err = library.Validate(input)
+	message, err := library.ValidateInput(input)
 	if err != nil {
-		return http.StatusBadRequest, err.Error(), nil, err
+		return http.StatusBadRequest, message, nil, err
 	}
 
-	if len(input.Tags) < 1 {
-		input.Tags = make([]string, 0)
+	isEnum := c.isAnEnum(*input.Condition)
+	if !isEnum {
+		return http.StatusBadRequest, "not an enum", nil, err
+	}
+
+	isImage := library.IsAnImageUrl(*input.ImageUrl)
+	if !isImage {
+		return http.StatusBadRequest, "must an image url", nil, err
 	}
 
 	err = c.repo.PRODUCT.Update(input)
@@ -123,9 +135,9 @@ func (c Product) UpdateStock(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
-	err = library.Validate(input)
+	message, err := library.ValidateInput(input)
 	if err != nil {
-		return http.StatusBadRequest, err.Error(), nil, err
+		return http.StatusBadRequest, message, nil, err
 	}
 
 	userID, _ := library.GetUserID(ctx)
@@ -213,4 +225,11 @@ func (c Product) Get(ctx *fiber.Ctx) (int, string, interface{}, error) {
 	}
 
 	return http.StatusOK, "ok", productDetail, err
+}
+
+func (c Product) isAnEnum(value string) bool {
+	if value != "new" && value != "second" {
+		return false
+	}
+	return true
 }

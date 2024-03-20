@@ -26,15 +26,14 @@ func (c User) Create(input collections.InputUserRegister) (int, error) {
 			($1, $2, $3, current_timestamp, current_timestamp)
 		RETURNING id;`
 	rows, err := c.db.Query(sql, input.Name, input.Username, input.Password)
+	if err != nil {
+		return id, fmt.Errorf("insert : %w", err)
+	}
 
 	for rows.Next() {
 		rows.Scan(&id)
 	}
 	defer rows.Close()
-
-	if err != nil {
-		return id, fmt.Errorf("insert : %w", err)
-	}
 
 	return id, nil
 }

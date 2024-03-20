@@ -31,9 +31,9 @@ func (c Payment) Create(ctx *fiber.Ctx) (int, string, interface{}, error) {
 		return http.StatusBadRequest, "unmarshal input", nil, err
 	}
 
-	err = library.Validate(input)
+	message, err := library.ValidateInput(input)
 	if err != nil {
-		return http.StatusBadRequest, err.Error(), nil, err
+		return http.StatusBadRequest, message, nil, err
 	}
 
 	input.UserID, _ = library.GetUserID(ctx)
