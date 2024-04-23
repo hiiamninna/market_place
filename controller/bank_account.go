@@ -15,7 +15,7 @@ type BankAccount struct {
 	repo repository.Repository
 }
 
-func NewBankAccountRepository(repo repository.Repository) BankAccount {
+func NewBankAccountController(repo repository.Repository) BankAccount {
 	return BankAccount{
 		repo: repo,
 	}
