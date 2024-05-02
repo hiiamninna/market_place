@@ -20,7 +20,7 @@ func NewController(repo repository.Repository, jwt library.JWT, bcryptSalt int, 
 		USER:         NewUserController(repo, jwt, bcryptSalt),
 		PRODUCT:      NewProductController(repo),
 		IMAGE:        NewImageController(s3),
-		BANK_ACCOUNT: NewBankAccountRepository(repo),
+		BANK_ACCOUNT: NewBankAccountController(repo),
 		PAYMENT:      NewPaymentController(repo),
 	}
 }
