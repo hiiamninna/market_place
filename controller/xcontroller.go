@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"market_place/library"
-	"market_place/repository"
+	"github.com/hiiamninna/market_place/library"
+	"github.com/hiiamninna/market_place/repository"
 
 	"github.com/google/uuid"
 )

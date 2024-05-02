@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"market_place/collections"
-	"market_place/library"
-	"market_place/repository"
 	"net/http"
 	"strconv"
+
+	"github.com/hiiamninna/market_place/collections"
+	"github.com/hiiamninna/market_place/library"
+	"github.com/hiiamninna/market_place/repository"
 
 	"github.com/gofiber/fiber/v2"
 	"golang.org/x/crypto/bcrypt"

@@ -3,8 +3,9 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"market_place/collections"
 	"strings"
+
+	"github.com/hiiamninna/market_place/collections"
 
 	"github.com/lib/pq"
 )

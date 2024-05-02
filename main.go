@@ -3,14 +3,18 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"market_place/collections"
-	"market_place/controller"
-	"market_place/library"
-	"market_place/repository"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/hiiamninna/market_place/repository"
+
+	"github.com/hiiamninna/market_place/library"
+
+	"github.com/hiiamninna/market_place/controller"
+
+	"github.com/hiiamninna/market_place/collections"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/adaptor"

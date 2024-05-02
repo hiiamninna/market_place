@@ -3,7 +3,8 @@ package repository
 import (
 	"database/sql"
 	"fmt"
-	"market_place/collections"
+
+	"github.com/hiiamninna/market_place/collections"
 )
 
 type User struct {
