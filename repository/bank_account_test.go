@@ -56,28 +56,6 @@ func (suite *BankAccountRepositoryTestSuite) TearDownTest() {
 	suite.mockDb.Close()
 }
 
-func (suite *BankAccountRepositoryTestSuite) TestBankAccountGetByIDSuccess() {
-	ba := dummyBankAccounts[0]
-	rows := sqlmock.NewRows([]string{"id", "name", "account_name", "account_number"}).AddRow(ba.ID, ba.BankName, ba.BankAccountName, ba.BankAccountNumber)
-
-	suite.mockSql.ExpectQuery(regexp.QuoteMeta(`SELECT TEXT(id), name, account_name, account_number FROM bank_accounts WHERE id = $1 AND user_id = $2 AND deleted_at is null;`)).WillReturnRows(rows)
-
-	repo := NewBankAccountRepository(suite.mockDb)
-
-	actual, err := repo.GetByID(ba.ID, ba.UserID)
-
-	assert.Nil(suite.T(), err)
-	assert.NotNil(suite.T(), actual)
-}
-
-func (suite *BankAccountRepositoryTestSuite) TestBankAccountCreateSuccess() {
-	ba := dummyBankAccounts[0]
-	suite.mockSql.ExpectExec(regexp.QuoteMeta(`INSERT INTO bank_accounts (name, account_name, account_number, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp);`)).WithArgs("AAA", "Account AAA", "123123", "1").WillReturnResult(sqlmock.NewResult(1, 1))
-	repo := NewBankAccountRepository(suite.mockDb)
-	err := repo.Create(ba)
-	assert.Nil(suite.T(), err)
-}
-
 func (suite *BankAccountRepositoryTestSuite) TestBankAccountListSuccess() {
 	rows := sqlmock.NewRows([]string{"id", "name", "account_name", "account_number"})
 
@@ -93,6 +71,48 @@ func (suite *BankAccountRepositoryTestSuite) TestBankAccountListSuccess() {
 	assert.Nil(suite.T(), err)
 	assert.Equal(suite.T(), 2, len(data))
 	assert.Equal(suite.T(), "AAA", data[0].BankName)
+}
+
+func (suite *BankAccountRepositoryTestSuite) TestBankAccountGetByIDSuccess() {
+	ba := dummyBankAccounts[0]
+	rows := sqlmock.NewRows([]string{"id", "name", "account_name", "account_number"}).AddRow(ba.ID, ba.BankName, ba.BankAccountName, ba.BankAccountNumber)
+
+	suite.mockSql.ExpectQuery(regexp.QuoteMeta(`SELECT TEXT(id), name, account_name, account_number FROM bank_accounts WHERE id = $1 AND user_id = $2 AND deleted_at is null;`)).WillReturnRows(rows)
+
+	repo := NewBankAccountRepository(suite.mockDb)
+
+	actual, err := repo.GetByID(ba.ID, ba.UserID)
+
+	assert.Nil(suite.T(), err)
+	assert.NotNil(suite.T(), actual)
+}
+
+// TO DO : if we are not return the new value, how to do the unit testing to check the value?
+func (suite *BankAccountRepositoryTestSuite) TestBankAccountCreateSuccess() {
+	ba := dummyBankAccounts[0]
+	suite.mockSql.ExpectExec(regexp.QuoteMeta(`INSERT INTO bank_accounts (name, account_name, account_number, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, current_timestamp, current_timestamp);`)).WithArgs("AAA", "Account AAA", "123123", "1").WillReturnResult(sqlmock.NewResult(1, 1))
+	repo := NewBankAccountRepository(suite.mockDb)
+	err := repo.Create(ba)
+	assert.Nil(suite.T(), err)
+}
+
+func (suite *BankAccountRepositoryTestSuite) TestBankAccountUpdateSuccess() {
+	suite.mockSql.ExpectExec(regexp.QuoteMeta(`UPDATE bank_accounts SET name = $1, account_name = $2, account_number = $3, updated_at = current_timestamp WHERE id = $4 AND deleted_at is null;`)).WithArgs("CCC", "Account CCC", "123123123", "1").WillReturnResult(sqlmock.NewResult(0, 1))
+	repo := NewBankAccountRepository(suite.mockDb)
+	err := repo.Update(collections.BankAccountInput{
+		ID:                "1",
+		BankName:          "CCC",
+		BankAccountName:   "Account CCC",
+		BankAccountNumber: "123123123",
+	})
+	assert.Nil(suite.T(), err)
+}
+
+func (suite *BankAccountRepositoryTestSuite) TestBankAccountDeleteSuccess() {
+	suite.mockSql.ExpectExec(regexp.QuoteMeta(`UPDATE bank_accounts SET deleted_at = current_timestamp WHERE id = $1 AND user_id = $2;`)).WithArgs("1", "1").WillReturnResult(sqlmock.NewResult(0, 1))
+	repo := NewBankAccountRepository(suite.mockDb)
+	err := repo.Delete("1", "1")
+	assert.Nil(suite.T(), err)
 }
 
 func TestBankAccountRepositoryTestSuite(t *testing.T) {
