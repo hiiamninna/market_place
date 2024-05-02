@@ -2,10 +2,11 @@ package controller
 
 import (
 	"fmt"
-	"market_place/collections"
-	"market_place/library"
 	"net/http"
 	"path/filepath"
+
+	"github.com/hiiamninna/market_place/collections"
+	"github.com/hiiamninna/market_place/library"
 
 	"github.com/gofiber/fiber/v2"
 )

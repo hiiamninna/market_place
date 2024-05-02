@@ -1,10 +1,10 @@
-module market_place
+module github.com/hiiamninna/market_place
 
 go 1.22.2
 
 require (
-	github.com/aws/aws-sdk-go v1.51.24
-	github.com/go-playground/validator/v10 v10.19.0
+	github.com/aws/aws-sdk-go v1.52.0
+	github.com/go-playground/validator/v10 v10.20.0
 	github.com/gofiber/fiber/v2 v2.52.4
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.6.0
@@ -36,7 +36,6 @@ require (
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.51.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect

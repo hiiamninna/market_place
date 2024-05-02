@@ -3,9 +3,10 @@ package repository
 import (
 	"database/sql"
 	"log"
-	"market_place/collections"
 	"regexp"
 	"testing"
+
+	"github.com/hiiamninna/market_place/collections"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
