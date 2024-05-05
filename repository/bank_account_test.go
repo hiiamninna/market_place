@@ -38,9 +38,9 @@ var dummyBankAccounts = []collections.BankAccountInput{
 }
 
 type BankAccountRepositoryTestSuite struct {
-	suite.Suite
-	mockDb  *sql.DB
-	mockSql sqlmock.Sqlmock
+	suite.Suite //-> from testify, make it easier to access the other data like (mock db, mock sql)
+	mockDb      *sql.DB
+	mockSql     sqlmock.Sqlmock
 }
 
 func (suite *BankAccountRepositoryTestSuite) SetupTest() {
